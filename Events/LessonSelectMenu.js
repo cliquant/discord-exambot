@@ -23,5 +23,6 @@ module.exports = {
 
             Database.setActiveLessonType(interaction.channel.id, lesson, firstId);
         }
+        
     }
 }
