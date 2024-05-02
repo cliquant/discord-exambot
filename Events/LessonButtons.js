@@ -45,7 +45,7 @@ module.exports = {
                         },
                     ],
                 }).then(channel => {
-                    channel.send(createStartLessonEmbed());
+                    channel.send(createStartLessonEmbed(true));
 
                     setTimeout(() => {
                         interaction.editReply({ content: "<#" + channel.id + ">", ephemeral: true })

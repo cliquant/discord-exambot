@@ -1,5 +1,6 @@
-const { StringSelectMenuBuilder, StringSelectMenuOptionBuilder, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle} = require("discord.js");
+const { ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle} = require("discord.js");
 const { getTop5Users, getLessonsInArray, getTitleFromLessonId } = require("./database");
+const Database = require("./database");
 
 function createStartEmbed() {
     const start = new ButtonBuilder()
@@ -72,7 +73,7 @@ function createSelectLessonMenu() {
     };
 }
 
-function createStartLessonEmbed() {
+function createStartLessonEmbed(something) {
 
     const end = new ButtonBuilder()
     .setCustomId('end_lesson')
@@ -104,15 +105,73 @@ function createStartLessonEmbed() {
         .setTimestamp()
         .setFooter({ text: 'Eksāmenu palīgs'});
 
+    if (something) {
+        return {
+            components: [row, row2],
+            embeds: [startedLessonEmbed],
+        };
+    } else {
+        return {
+            components: [row],
+            embeds: [startedLessonEmbed],
+        };
+    }
+}
+
+function createQuestionEmbed(lesson, questionId, userId) {
+    const question = Database.getQuestionFromId(lesson, questionId);
+
+    const answer = new ButtonBuilder()
+        .setCustomId('answer_question_' + questionId + '_' + lesson)
+        .setLabel('Atbildēt')
+        .setStyle(ButtonStyle.Secondary);
+    
+    const takeHint = new ButtonBuilder()
+        .setCustomId('take_hint_' + questionId + '_' + lesson)
+        .setLabel('Paņemt hint')
+        .setStyle(ButtonStyle.Success)
+        .setDisabled(!Database.canUseHint(userId, lesson, questionId))
+
+    const row = new ActionRowBuilder()
+        .addComponents(answer, takeHint);
+
+    const questionEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Jautājums')
+        .setDescription(question.question)
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
     return {
-        components: [row, row2],
-        embeds: [startedLessonEmbed],
+        embeds: [questionEmbed],
+        components: [row],
     };
+}
+
+function createAnswerModal(lesson, questionId) {
+    console.log(lesson + " " + questionId)
+    let question = Database.getQuestionFromId(lesson, questionId);
+    const modal = new ModalBuilder()
+        .setCustomId('answer_submit_modal_' + questionId)
+        .setTitle('Atbilde');
+
+    const answerInput = new TextInputBuilder()
+        .setCustomId('answer_submit_input_' + questionId)
+        .setLabel("Atbilde")
+        .setStyle(TextInputStyle.Paragraph)
+        .setMinLength(1)
+        .setPlaceholder('Ieraksti atbildi šeit');
+
+    modal.addComponents(answerInput);
+
+    return modal;
 }
 
 module.exports = {
     createStartEmbed,
     createTopEmbed,
     createSelectLessonMenu,
-    createStartLessonEmbed
+    createStartLessonEmbed,
+    createQuestionEmbed,
+    createAnswerModal
 }

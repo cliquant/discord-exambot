@@ -375,12 +375,58 @@ function removeActiveLesson(userId, channelId) {
     }
 }
 
-function setActiveLessonType(channelId, type) {
+function setActiveLessonType(channelId, type, firstid) {
     let activeLessons = getActiveLessons()
     let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId)
     activeLessons[lessonIndex].type = type
+    activeLessons[lessonIndex].questionId = firstid
     activeLessonsDatabase.set('activeLessons', activeLessons)
     activeLessonsDatabase.sync()
 }
 
-module.exports = { removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount }
+function getQuestionFromId(lessonName, questionId) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    return lessons[lessonName].questions.find(question => question.id === questionId)
+}
+
+function getAnswerFromId(lessonName, questionId) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    return lessons[lessonName].questions.find(question => question.id === questionId).answers[0]
+}
+
+function canUseHint(userId, lessonName, questionId) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    return lessons[lessonName].questions.find(question => question.id === questionId).hint.enabled
+}
+
+function getHintFromId(lessonName, questionId) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    return lessons[lessonName].questions.find(question => question.id === questionId).hint
+}
+
+function getLessonFirstQuestionId(lessonName) {
+    let questions = getLessonQuestions(lessonName)
+    return questions[0].id
+}
+
+function getLessonNextQuestionId(userId, channelId, lessonName, currentQuestionId) {
+    let user = getUser(userId)
+    let userLessons = user.lessons
+    let lesson = userLessons[lessonName]
+    let questions = getLessonQuestions(lessonName)
+    let questionIndex = questions.findIndex(question => question.id === currentQuestionId)
+    let nextQuestion = questions[questionIndex + 1]
+    let questionId = nextQuestion.id
+
+    // update in activelessons question id
+    let activeLessons = getActiveLessons()
+    let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId)
+    activeLessons[lessonIndex].questionId = questionId
+    activeLessonsDatabase.set('activeLessons', activeLessons)
+    activeLessonsDatabase.sync()
+
+    return questionId
+}
+
+
+module.exports = { setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId}
