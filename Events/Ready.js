@@ -1,7 +1,7 @@
 const { ActivityType, Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle} = require("discord.js");
 const Database = require("../Functions/database");
-const { createStartEmbed } = require("../Functions/embeds");
-const { GUILD_START_CHANNEL_ID } = process.env;
+const { createStartEmbed, createTopEmbed } = require("../Functions/embeds");
+const { GUILD_START_CHANNEL_ID, GUILD_TOP_CHANNEL_ID } = process.env;
 
 module.exports = {
 	name: Events.ClientReady,
@@ -25,14 +25,21 @@ module.exports = {
                 }, 5000);
             }, 5000);
 
-            // get channel by id GUILD_START_CHANNEL_ID
-            const channel = client.channels.cache.get(GUILD_START_CHANNEL_ID);
-            // clear messages
-            await channel.messages.fetch().then(messages => {
-                channel.bulkDelete(messages);
+            const channel_start = client.channels.cache.get(GUILD_START_CHANNEL_ID);
+            await channel_start.messages.fetch().then(messages => {
+                channel_start.bulkDelete(messages);
             });
+            await channel_start.send(createStartEmbed());
 
-            await channel.send(createStartEmbed());
+            const channel_top = client.channels.cache.get(GUILD_TOP_CHANNEL_ID);
+            await channel_top.messages.fetch().then(messages => {
+                channel_top.bulkDelete(messages);
+            });
+            await channel_top.send(createTopEmbed()).then(message => {
+                setInterval(() => {
+                    message.edit(createTopEmbed());
+                }, 1000);
+            });
         })
     }
 }
