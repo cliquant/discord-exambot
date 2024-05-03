@@ -414,6 +414,7 @@ function setActiveLessonType(channelId, type, firstid) {
     let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId)
     activeLessons[lessonIndex].type = type
     activeLessons[lessonIndex].questionId = firstid
+    activeLessons[lessonIndex].status = 'training'
     activeLessonsDatabase.set('activeLessons', activeLessons)
     activeLessonsDatabase.sync()
 }
@@ -444,21 +445,34 @@ function getLessonFirstQuestionId(lessonName) {
 }
 
 function getLessonNextQuestionId(userId, channelId, lessonName, currentQuestionId) {
-    let user = getUser(userId)
-    let userLessons = user.lessons
-    let lesson = userLessons[lessonName]
-    let questions = getLessonQuestions(lessonName)
-    let questionIndex = questions.findIndex(question => question.id === currentQuestionId)
-    let nextQuestion = questions[questionIndex + 1]
-    let questionId = nextQuestion.id
+    let user = getUser(userId);
+    let lesson = user.lessons[lessonName];
+    let questions = getLessonQuestions(lessonName);
+    let questionIndex = questions.findIndex(question => question.id === currentQuestionId);
 
-    let activeLessons = getActiveLessons()
-    let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId)
-    activeLessons[lessonIndex].questionId = questionId
-    activeLessonsDatabase.set('activeLessons', activeLessons)
-    activeLessonsDatabase.sync()
+    if (questionIndex === -1) {
+        throw new Error('Current question not found in the list.');
+    }
 
-    return questionId
+    let nextQuestion = questions[questionIndex + 1];
+
+    if (!nextQuestion) {
+        return 'there_is_no_more_questions';
+    }
+
+    let questionId = nextQuestion.id;
+    let activeLessons = getActiveLessons();
+    let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId);
+
+    if (lessonIndex === -1) {
+        throw new Error('Lesson not found in active lessons.');
+    }
+
+    activeLessons[lessonIndex].questionId = questionId;
+    activeLessonsDatabase.set('activeLessons', activeLessons);
+    activeLessonsDatabase.sync();
+
+    return questionId;
 }
 
 function getLessonQuestionFromId(lessonName, questionId) {
@@ -533,5 +547,42 @@ function formatTime(time) {
     return moment(time).fromNow().replace(' ago', '');
 }
 
+function checkAnswer(lesson, questionId, answer) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    let correctAnswers = lessons[lesson].questions.find(question => question.id === questionId)
+    for (let correctAnswer of correctAnswers.answers) {
+        if (answer === correctAnswer) {
+            return true
+        }
+    }
+    return false
+}
 
-module.exports = { getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray}
+function addActiveLessonHistoryAnswer(userId, channelId, lesson, questionId, answer, correct) {
+    let activeLessons = getActiveLessons()
+    let lessonIndex = activeLessons.findIndex(lesson => lesson.userId === userId && lesson.channelId === channelId)
+    let answerHistory = activeLessons[lessonIndex].answerHistory || []
+    let reward = lessonsDatabase.get('lessons')[lesson].questions.find(question => question.id === questionId).reward
+    if (!correct) {
+        reward = 0
+    }
+    answerHistory.push({ questionId: questionId, answer: answer, correct: correct, reward: reward })
+    activeLessons[lessonIndex].answerHistory = answerHistory
+    activeLessonsDatabase.set('activeLessons', activeLessons)
+    activeLessonsDatabase.sync()
+}
+
+function getActiveLessonHistory(userId, channelId) {
+    let activeLessons = getActiveLessons()
+    let lessonIndex = activeLessons.findIndex(lesson => lesson.userId === userId && lesson.channelId === channelId)
+    return activeLessons[lessonIndex].answerHistory || []
+}
+
+function addToUserHistoryALesson(userId, lesson) {
+    let user = getUser(userId)
+    user.lessonsHistory.push(lesson)
+    usersDatabase.set('users', users)
+    usersDatabase.sync()
+}
+
+module.exports = { addToUserHistoryALesson, getActiveLessonHistory, addActiveLessonHistoryAnswer, getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray, checkAnswer}

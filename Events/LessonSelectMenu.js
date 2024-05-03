@@ -1,7 +1,6 @@
 const { ChannelType, PermissionFlagsBits, ActivityType, Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle} = require("discord.js");
 const Database = require("../Functions/database");
 const { createQuestionEmbed, createStartLessonEmbed, createSelectLessonMenu } = require("../Functions/embeds");
-const { set } = require("lodash");
 const { MAX_ACTIVE_LESSONS, GUILD_CATEGORY_LESSONS_ID, GUILD_ADMIN_ROLE_ID } = process.env;
 
 module.exports = {
@@ -11,15 +10,14 @@ module.exports = {
         if (!interaction.isStringSelectMenu()) return;
         if (interaction.values[0].startsWith('select_lesson_')) {
             let lesson = interaction.values[0].split('_')[2];
+            let lessonName = Database.getTitleFromLessonId(lesson)
 
-            interaction.message.edit(createStartLessonEmbed(false));
-            interaction.reply({ content: 'Treniņš sākts mācībā: ```' + Database.getTitleFromLessonId(lesson) + '```'});
+            interaction.update(createStartLessonEmbed(false));
 
             let firstId = Database.getLessonFirstQuestionId(lesson);
-
-            setTimeout(() => {
-                interaction.channel.send(createQuestionEmbed(lesson, firstId, interaction.user.id));
-            }, 500);
+            let questionEmbed = createQuestionEmbed(lesson, firstId, interaction.user.id, false, false);
+    
+            await interaction.channel.send(questionEmbed);
 
             Database.setActiveLessonType(interaction.channel.id, lesson, firstId);
         }

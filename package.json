@@ -1,5 +1,5 @@
 {
-  "name": "jptc-exambot",
+  "name": "discord-exambot",
   "version": "1.0.0",
   "description": "Eksāmenu/mācību sagatavošanās bots.",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "jptc-discord-exambot"
+    "url": "discord-exambot"
   },
   "author": "cliquant",
   "license": "ISC",

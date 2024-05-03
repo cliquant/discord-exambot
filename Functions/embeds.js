@@ -27,6 +27,14 @@ function createStartEmbed() {
 
 function createTopEmbed(users) {
 
+    const button = new ButtonBuilder()
+        .setCustomId('my_profile')
+        .setLabel('Mans Profils')
+        .setStyle(ButtonStyle.Secondary);
+
+    const row = new ActionRowBuilder()
+        .addComponents(button);
+
     let lessons = getLessonsInArray();
     let topMessage = "Šeit ir katras mācības top 5 lietotāji\n\n";
     lessons.forEach(lesson => {
@@ -48,6 +56,7 @@ function createTopEmbed(users) {
 
     return {
         embeds: [topEmbed],
+        components: [row],
     };
 }
 
@@ -77,9 +86,9 @@ function createSelectLessonMenu() {
 function createStartLessonEmbed(something) {
 
     const end = new ButtonBuilder()
-    .setCustomId('end_lesson')
-    .setLabel('Beigt treniņu')
-    .setStyle(ButtonStyle.Danger);
+        .setCustomId('end_lesson')
+        .setLabel('Beigt treniņu')
+        .setStyle(ButtonStyle.Danger);
 
     const lessons = getLessonsInArray();
     const options = lessons.map(lesson => {
@@ -119,27 +128,40 @@ function createStartLessonEmbed(something) {
     }
 }
 
-function createQuestionEmbed(lesson, questionId, userId) {
+function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight) {
     const question = Database.getQuestionFromId(lesson, questionId);
 
     const answer = new ButtonBuilder()
         .setCustomId('answer_question_' + questionId + '_' + lesson)
         .setLabel('Atbildēt')
-        .setStyle(ButtonStyle.Secondary);
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(answered);
     
     const takeHint = new ButtonBuilder()
         .setCustomId('take_hint_' + questionId + '_' + lesson)
         .setLabel('Paņemt hint')
         .setStyle(ButtonStyle.Success)
-        .setDisabled(!Database.canUseHint(userId, lesson, questionId))
+        .setDisabled(!Database.canUseHint(userId, lesson, questionId) || answered)
 
     const row = new ActionRowBuilder()
         .addComponents(answer, takeHint);
 
+    let desc = "```" + question.question + "```";
+
+    if (answered) {
+        if (answeredRight) {
+            desc += "\n\n```Atbilde: " + question.answers[0] + "```";
+            desc += "\n\n" + "```🟢 Pareizi atbildēts! Tu ieguvi: " + question.reward + " punktus!" + "```";
+        } else {
+            desc += "\n\nAtbilde: " + question.answers[0];
+            desc += "\n\n" + "```🔴 Nepareizi atbildēts!```";
+        }
+    }
+
     const questionEmbed = new EmbedBuilder()
         .setColor('#ffffff')
         .setTitle('Jautājums')
-        .setDescription(question.question)
+        .setDescription(desc)
         .setTimestamp()
         .setFooter({ text: 'Eksāmenu palīgs'});
 
@@ -149,21 +171,21 @@ function createQuestionEmbed(lesson, questionId, userId) {
     };
 }
 
-function createAnswerModal(lesson, questionId) {
-    console.log(lesson + " " + questionId)
+function createAnswerModal(lesson, questionId, messageId) {
     let question = Database.getQuestionFromId(lesson, questionId);
     const modal = new ModalBuilder()
-        .setCustomId('answer_submit_modal_' + questionId)
-        .setTitle('Atbilde');
+        .setCustomId('answer_modal_' + questionId + '_' + lesson + '_' + messageId)
+        .setTitle('Atbilde uz jautājumu');
 
-    const answerInput = new TextInputBuilder()
-        .setCustomId('answer_submit_input_' + questionId)
-        .setLabel("Atbilde")
-        .setStyle(TextInputStyle.Paragraph)
-        .setMinLength(1)
-        .setPlaceholder('Ieraksti atbildi šeit');
+    const favoriteColorInput = new TextInputBuilder()
+        .setCustomId('answer_to_question')
+        .setLabel(question.question)
+        .setStyle(TextInputStyle.Paragraph);
 
-    modal.addComponents(answerInput);
+
+    const firstActionRow = new ActionRowBuilder().addComponents(favoriteColorInput);
+
+    modal.addComponents(firstActionRow);
 
     return modal;
 }
@@ -311,6 +333,80 @@ function usersWhoCurrentlyTraining() {
     };
 }
 
+function lessonFinishedEmbed(userId, channelId) {
+    const topEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Treniņš pabeigts')
+        .setDescription("Tu esi pabeidzis treniņu, šeit ir tava atbilžu vēsture. Spied uz pogas 'Beigt treniņu' lai pabeigtu pa visam šo treniņu.")
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    let answers = Database.getActiveLessonHistory(userId, channelId);
+
+    let message = "";
+
+    let lesson = Database.getActiveLessonByChannel(channelId);
+
+    question1 = 0;
+
+    totalPoints = 0;
+
+    answersRight = 0;
+
+    fromAnswers = answers.length;
+
+    answers.forEach(answer => {
+        question1++;
+        answersRight += answer.correct ? 1 : 0;
+        emoji = answer.correct ? "🟢" : "🔴";
+        totalPoints += answer.correct ? Database.getQuestionFromId(lesson.type, answer.questionId).reward : 0;
+        let question = Database.getQuestionFromId(lesson.type, answer.questionId);
+        message += "```" + "" + question.question + "\n" + "Tava atbilde: " + answer.answer + "\nPareizā atbilde: " + question.answers[0] + "```";
+        message += "\n\n";
+    });
+
+    message += "```Tu esi atbildējis pareizi uz " + answersRight + " no " + fromAnswers + " jautājumiem!```\n";
+    message += "```Tu esi ieguvis kopā " + totalPoints + " punktus!```";
+
+
+    const topEmbed2 = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Atbilžu vēsture')
+        .setDescription(message)
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    const end = new ButtonBuilder()
+        .setCustomId('end_lesson')
+        .setLabel('Beigt treniņu')
+        .setStyle(ButtonStyle.Danger);
+
+    const row = new ActionRowBuilder()
+        .addComponents(end);
+
+    return {
+        embeds: [topEmbed2, topEmbed],
+        components: [row],
+    };
+}
+
+function myProfileEmbed(user) {
+    let lessons = getLessonsInArray();
+    let databaseUser = Database.getUser(user.id);
+    const topEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Mans profils')
+        .setDescription(`> Coins: ${databaseUser.coins}\n`)
+        .setTimestamp()
+        .setThumbnail('https://cdn.discordapp.com/avatars/' + user.id + '/' + user.avatar + '.png')
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    return {
+        embeds: [topEmbed],
+        ephemeral: true
+    };
+}
+
 module.exports = {
     createStartEmbed,
     createTopEmbed,
@@ -323,5 +419,7 @@ module.exports = {
     bookSelectTopic,
     bookContentPage,
     explainBotEmbed,
-    usersWhoCurrentlyTraining
+    usersWhoCurrentlyTraining,
+    lessonFinishedEmbed,
+    myProfileEmbed
 }
