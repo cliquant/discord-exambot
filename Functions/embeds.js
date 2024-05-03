@@ -1,6 +1,7 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle} = require("discord.js");
 const { getTop5Users, getLessonsInArray, getTitleFromLessonId } = require("./database");
 const Database = require("./database");
+const { GUILD_BOOKS_CHANNEL_ID, GUILD_TRAIN_CHANNEL_ID, GUILD_TOP_CHANNEL_ID, GUILD_START_CHANNEL_ID } = process.env;
 
 function createStartEmbed() {
     const start = new ButtonBuilder()
@@ -167,11 +168,160 @@ function createAnswerModal(lesson, questionId) {
     return modal;
 }
 
+function createBooksEmbed() {
+    const button = new ButtonBuilder()
+        .setCustomId('start_books')
+        .setLabel('Sākt mācīties')
+        .setStyle(ButtonStyle.Secondary);
+
+    const row = new ActionRowBuilder()
+        .addComponents(button)
+
+    const booksEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Grāmatas')
+        .setDescription("```Šeit ir saraksts ar grāmatām, kuras var noderēt eksāmena sagatavošanās. Spied uz pogas 'Sākt mācīties'.```")
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    return {
+        components: [row],
+        embeds: [booksEmbed],
+    };
+
+}
+
+function bookFirstPage() {
+    const lessons = Database.getBookLessonsIdsInArray();
+    const options = lessons.map(lesson => {
+        return new StringSelectMenuOptionBuilder()
+            .setLabel(Database.getBookLessonTitleFromId(lesson))
+            .setValue("lesson_book_" + lesson)
+    });
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('book_select_lesson')
+        .setPlaceholder('Izvēlies mācību')
+        .addOptions(options);
+
+    const row = new ActionRowBuilder()
+        .addComponents(selectMenu)
+
+    const booksEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Grāmatas')
+        .setDescription("```Izvēlies grāmatu, lai uzzinātu vairāk par tās saturu.```")
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    return {
+        components: [row],
+        embeds: [booksEmbed],
+        ephemeral: true
+    };
+}
+
+function bookContentPage(title, content, lesson) {
+    const button = new ButtonBuilder()
+        .setCustomId('select_book_topic_' + lesson)
+        .setLabel('Atpakaļ')
+        .setStyle(ButtonStyle.Secondary);
+
+    const row = new ActionRowBuilder()
+        .addComponents(button)
+
+    const booksEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle(title)
+        .setDescription(content)
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    return {
+        components: [row],
+        embeds: [booksEmbed],
+        ephemeral: true
+    };
+}
+
+function bookSelectTopic(lesson) {
+    const topics = Database.getTopicIdsInArray(lesson);
+
+    const options = topics.map(topic => {
+        return new StringSelectMenuOptionBuilder()
+            .setLabel(Database.getTopicTitleFromId(lesson, topic))
+            .setValue("topic_book_" + topic + "_" + lesson)
+    });
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('select_book')
+        .setPlaceholder('Izvēlies tēmu')
+        .addOptions(options);
+
+    const row = new ActionRowBuilder()
+        .addComponents(selectMenu)
+
+    const booksEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Grāmatas')
+        .setDescription("```Izvēlies tēmu, lai uzzinātu vairāk par tās saturu.```")
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    return {
+        components: [row],
+        embeds: [booksEmbed],
+        ephemeral: true
+    };
+}
+
+function explainBotEmbed() {
+    const booksEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Sākums')
+        .setDescription("\n\n<#" + GUILD_BOOKS_CHANNEL_ID + "> - Šaja channel ir iespējams izlasīt par kādu specifisku tēmu paskaidrojumu.\n<#" + GUILD_TRAIN_CHANNEL_ID + "> - Šeit ir iespējams sākt treniņu lai pārbaudītu savas zināšanas\n<#" + GUILD_TOP_CHANNEL_ID + "> - Šeit ir iespējams redzēt top lietotājus ( punktus ir iespējams iegūt darot treniņus )\n\n```Bots veidots priekš JPTC izaicinājuma, paša pieredzei un ar mērķi palīdzēt studentiem sagatavoties eksāmeniem.```")
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    return {
+        embeds: [booksEmbed],
+    };
+}
+
+function usersWhoCurrentlyTraining() {
+    let lessons = getLessonsInArray();
+    let topMessage = "";
+    lessons.forEach(lesson => {
+        let activeUsers = Database.getActiveLessonUsersByType(lesson);
+        topMessage += `**${getTitleFromLessonId(lesson)}**:\n`;
+        activeUsers.forEach(user => {
+            topMessage += `<@${user[0]}> - ` + "``" + `${Database.getLessonQuestionFromId(lesson, user[2]).question}` + "``" + ` - ${Database.formatTime(Database.getStartedAt(user[0], user[1]))}\n`;
+        });
+    });
+
+    const topEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Šobrīd trenējas')
+        .setDescription(topMessage)
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    return {
+        embeds: [topEmbed],
+    };
+}
+
 module.exports = {
     createStartEmbed,
     createTopEmbed,
     createSelectLessonMenu,
     createStartLessonEmbed,
     createQuestionEmbed,
-    createAnswerModal
+    createAnswerModal,
+    createBooksEmbed,
+    bookFirstPage,
+    bookSelectTopic,
+    bookContentPage,
+    explainBotEmbed,
+    usersWhoCurrentlyTraining
 }

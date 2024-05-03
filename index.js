@@ -56,14 +56,10 @@ const rest = new REST().setToken(DISCORD_BOT_TOKEN);
 
 (async () => {
 	try {
-		console.log(`[BOT] Started refreshing ${commands.length} application (/) commands.`);
-
 		const data = await rest.put(
 			Routes.applicationGuildCommands(DISCORD_BOT_ID, DISCORD_GUILD_ID),
 			{ body: commands },
 		);
-
-		console.log(`[BOT] Successfully reloaded ${data.length} application (/) commands.`);
 	} catch (error) {
 		console.error(error);
 	}

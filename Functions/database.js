@@ -1,10 +1,9 @@
-const { clear } = require('console');
-const { get } = require('lodash');
-const { start } = require('repl');
+const moment = require('moment');
 const JSONdb = require('simple-json-db');
 const usersDatabase = new JSONdb('./Database/users.json');
 const lessonsDatabase = new JSONdb('./Database/lessons.json');
 const activeLessonsDatabase = new JSONdb('./Database/activeLessons.json');
+const booksDatabase = new JSONdb('./Database/books.json');
 
 function startTimers() {
     setInterval(() => {
@@ -17,6 +16,14 @@ async function prepareDatabase() {
 
     if (!usersDatabase.has('users')) {
         usersDatabase.set('users', []);
+        usersDatabase.sync();
+    }
+
+    if (!booksDatabase.has('books')) {
+        console.log('[DATABASE] Adding default books...')
+        const defaultBooks = {}
+
+        usersDatabase.set('users', defaultBooks);
         usersDatabase.sync();
     }
 
@@ -341,7 +348,9 @@ function getActiveLessonByChannel(channelId) {
 
 function addActiveLesson(userId, channelId) {
     let activeLessons = activeLessonsDatabase.get('activeLessons') || []
-    activeLessons.push({ userId: userId, channelId: channelId, startedAt: Date.now(), type: '' })
+    let date = new Date()
+    let timestamp = date.getTime()
+    activeLessons.push({ userId: userId, channelId: channelId, startedAt: timestamp, type: '' })
     activeLessonsDatabase.set('activeLessons', activeLessons)
     activeLessonsDatabase.sync()
 }
@@ -443,7 +452,6 @@ function getLessonNextQuestionId(userId, channelId, lessonName, currentQuestionI
     let nextQuestion = questions[questionIndex + 1]
     let questionId = nextQuestion.id
 
-    // update in activelessons question id
     let activeLessons = getActiveLessons()
     let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId)
     activeLessons[lessonIndex].questionId = questionId
@@ -453,5 +461,77 @@ function getLessonNextQuestionId(userId, channelId, lessonName, currentQuestionI
     return questionId
 }
 
+function getLessonQuestionFromId(lessonName, questionId) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    return lessons[lessonName].questions.find(question => question.id === questionId)
+}
 
-module.exports = { setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId}
+function getBookLessonTitleFromId(bookId) {
+    let books = booksDatabase.get('books') || []
+    return books[bookId].title
+}
+
+function getBookLessonsIdsInArray() {
+    let books = booksDatabase.get('books') || []
+    let bookIds = []
+    for (let key in books) {
+        bookIds.push(key)
+    }
+    return bookIds
+}
+
+function getBookContent(topic, bookId) {
+    let books = booksDatabase.get('books') || []
+    return books[topic].id[bookId].content
+}
+
+function getTopicIdsInArray(topic) {
+    let books = booksDatabase.get('books') || []
+    let bookIds = []
+    for (let key in books[topic].topics) {
+        bookIds.push(books[topic].topics[key].id)
+    }
+    return bookIds
+}
+
+function getTopicTitleFromId(lesson, topic) {
+    let books = booksDatabase.get('books') || []
+    for (let key in books[lesson].topics) {
+        if (books[lesson].topics[key].id === topic) {
+            return books[lesson].topics[key].title
+        }
+    }
+}
+
+function getTopicContentFromId(lesson, topic) {
+    let books = booksDatabase.get('books') || []
+    for (let key in books[lesson].topics) {
+        if (books[lesson].topics[key].id === topic) {
+            return books[lesson].topics[key].content
+        }
+    }
+}
+
+function getActiveLessonUsersByType(type) {
+    let activeLessons = getActiveLessons()
+    let users = []
+    activeLessons.forEach(lesson => {
+        if (lesson.type === type) {
+            users.push([lesson.userId, lesson.channelId, lesson.questionId])
+        }
+    })
+    return users
+}
+
+function getStartedAt(userId, channelId) {
+    let activeLessons = getActiveLessons()
+    let lesson = activeLessons.find(lesson => lesson.userId === userId && lesson.channelId === channelId)
+    return lesson.startedAt
+}
+
+function formatTime(time) {
+    return moment(time).fromNow().replace(' ago', '');
+}
+
+
+module.exports = { getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray}
