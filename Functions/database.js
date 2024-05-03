@@ -43,8 +43,9 @@ async function prepareDatabase() {
                         "image": "none",
                         "question": "Cik ir 2+2?",
                         "image": "https://i.imgur.com/1zQ1Q9z.png",
-                        "type": "text",
-                        "answers": [4, "četri", "četrpadsmit", "4", "four", "fourteen"],
+                        "type": "select",
+                        "answers": [],
+                        "select": [{"4": true, "id": "answer1"}, {"5": false, "id": "answer2"}],
                         "reward": 1,
                         "hint": {
                             "enabled": false,
@@ -549,10 +550,20 @@ function formatTime(time) {
 
 function checkAnswer(lesson, questionId, answer) {
     let lessons = lessonsDatabase.get('lessons') || []
-    let correctAnswers = lessons[lesson].questions.find(question => question.id === questionId)
-    for (let correctAnswer of correctAnswers.answers) {
-        if (answer === correctAnswer) {
-            return true
+    if (lessons[lesson].questions.find(question => question.id === questionId).type === 'text') {
+        let correctAnswers = lessons[lesson].questions.find(question => question.id === questionId)
+        for (let correctAnswer of correctAnswers.answers) {
+            if (answer === correctAnswer.toString()) {
+                return true
+            }
+        }
+    } else {
+        let correctAnswers = lessons[lesson].questions.find(question => question.id === questionId)
+        for (let correctAnswer of correctAnswers.select) {
+            console.log(correctAnswer)
+            if (answer === correctAnswer.toString()) {
+                return true
+            }
         }
     }
     return false
@@ -579,10 +590,16 @@ function getActiveLessonHistory(userId, channelId) {
 }
 
 function addToUserHistoryALesson(userId, lesson) {
-    let user = getUser(userId)
-    user.lessonsHistory.push(lesson)
-    usersDatabase.set('users', users)
-    usersDatabase.sync()
-}
+    let users = getUsers();
+    let user = getUser(userId);
 
+    if (!Array.isArray(user.lessonsHistory)) {
+        user.lessonsHistory = [];
+    }
+
+    user.lessonsHistory.push(lesson);
+
+    usersDatabase.set('users', users);
+    usersDatabase.sync();
+}
 module.exports = { addToUserHistoryALesson, getActiveLessonHistory, addActiveLessonHistoryAnswer, getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray, checkAnswer}

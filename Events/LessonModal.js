@@ -19,6 +19,9 @@ module.exports = {
 			const questionId = interaction.customId.split('_')[2];
 			const messageId = interaction.customId.split('_')[4];
 
+			
+			console.log(interaction.customId.split('_'))
+
 			let answer = interaction.fields.getTextInputValue('answer_to_question');
 
 			let correct = Database.checkAnswer(lesson, questionId, answer);

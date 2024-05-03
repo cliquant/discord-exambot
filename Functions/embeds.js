@@ -131,11 +131,34 @@ function createStartLessonEmbed(something) {
 function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight) {
     const question = Database.getQuestionFromId(lesson, questionId);
 
-    const answer = new ButtonBuilder()
-        .setCustomId('answer_question_' + questionId + '_' + lesson)
-        .setLabel('Atbildēt')
-        .setStyle(ButtonStyle.Secondary)
-        .setDisabled(answered);
+    let answer;
+    let selectMenu;
+
+    if (question.type == "text") {
+        answer = new ButtonBuilder()
+            .setCustomId('answer_question_' + questionId + '_' + lesson)
+            .setLabel('Atbildēt')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(answered);
+    } else {
+        if (!answered) {
+            const options = question.select.map(lesson1 => {
+                let key = Object.keys(lesson1)[0];
+                let value = lesson1[key]
+
+                return new StringSelectMenuOptionBuilder()
+                    .setLabel(key)
+                    .setValue(`select_answer_${lesson}_${questionId}_${lesson1.id}`)
+
+            });
+
+            selectMenu = new StringSelectMenuBuilder()
+                .setCustomId('select_lesson')
+                .setPlaceholder('Izvēlies mācību')
+                .addOptions(options);
+        }
+    }
+    
     
     const takeHint = new ButtonBuilder()
         .setCustomId('take_hint_' + questionId + '_' + lesson)
@@ -143,8 +166,19 @@ function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight
         .setStyle(ButtonStyle.Success)
         .setDisabled(!Database.canUseHint(userId, lesson, questionId) || answered)
 
-    const row = new ActionRowBuilder()
+    let row = [];
+
+    if (question.type == "text") {
+        row[0] = new ActionRowBuilder()
         .addComponents(answer, takeHint);
+    } else {
+        row[0] = new ActionRowBuilder()
+        .addComponents(takeHint);
+        if (!answered) {
+            row[1] = new ActionRowBuilder()
+            .addComponents(selectMenu);
+        }
+    }
 
     let desc = "```" + question.question + "```";
 
@@ -158,16 +192,28 @@ function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight
         }
     }
 
-    const questionEmbed = new EmbedBuilder()
-        .setColor('#ffffff')
-        .setTitle('Jautājums')
-        .setDescription(desc)
-        .setTimestamp()
-        .setFooter({ text: 'Eksāmenu palīgs'});
+    let questionEmbed;
+
+    if (question.image == "" || question.image == "none") {
+        questionEmbed = new EmbedBuilder()
+            .setColor('#ffffff')
+            .setTitle('Jautājums')
+            .setDescription(desc)
+            .setTimestamp()
+            .setFooter({ text: 'Eksāmenu palīgs'});
+    } else {
+        questionEmbed = new EmbedBuilder()
+            .setColor('#ffffff')
+            .setTitle('Jautājums')
+            .setDescription(desc)
+            .setTimestamp()
+            .setImage(question.image)
+            .setFooter({ text: 'Eksāmenu palīgs'});
+    }
 
     return {
         embeds: [questionEmbed],
-        components: [row],
+        components: row,
     };
 }
 
