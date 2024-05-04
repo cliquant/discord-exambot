@@ -26,15 +26,6 @@ function createStartEmbed() {
 }
 
 function createTopEmbed(users) {
-
-    const button = new ButtonBuilder()
-        .setCustomId('my_profile')
-        .setLabel('Mans Profils')
-        .setStyle(ButtonStyle.Secondary);
-
-    const row = new ActionRowBuilder()
-        .addComponents(button);
-
     let lessons = getLessonsInArray();
     let topMessage = "Šeit ir katras mācības top 5 lietotāji\n\n";
     lessons.forEach(lesson => {
@@ -55,8 +46,7 @@ function createTopEmbed(users) {
         .setFooter({ text: 'Eksāmenu palīgs'});
 
     return {
-        embeds: [topEmbed],
-        components: [row],
+        embeds: [topEmbed]
     };
 }
 
@@ -376,17 +366,34 @@ function bookSelectTopic(lesson) {
     };
 }
 
-function explainBotEmbed() {
+function explainBotEmbed(command = null) {
+    const button = new ButtonBuilder()
+    .setCustomId('my_profile')
+    .setLabel('Mans Profils')
+    .setStyle(ButtonStyle.Secondary);
+
+    const row = new ActionRowBuilder()
+        .addComponents(button);
+
     const booksEmbed = new EmbedBuilder()
         .setColor('#ffffff')
         .setTitle('Sākums')
-        .setDescription("\n\n> <#" + GUILD_BOOKS_CHANNEL_ID + "> - Šaja channel ir iespējams izlasīt par kādu specifisku tēmu paskaidrojumu.\n> <#" + GUILD_TRAIN_CHANNEL_ID + "> - Šeit ir iespējams sākt treniņu lai pārbaudītu savas zināšanas\n> <#" + GUILD_TOP_CHANNEL_ID + "> - Šeit ir iespējams redzēt top lietotājus ( punktus ir iespējams iegūt darot treniņus )\n\n```Bots veidots priekš JPTC izaicinājuma, paša pieredzei un ar mērķi palīdzēt studentiem sagatavoties eksāmeniem.```")
+        .setDescription("\n\n> <#" + GUILD_BOOKS_CHANNEL_ID + "> - Šaja channel ir iespējams izlasīt par kādu specifisku tēmu paskaidrojumu.\n> <#" + GUILD_TRAIN_CHANNEL_ID + "> - Šeit ir iespējams sākt treniņu lai pārbaudītu savas zināšanas\n> <#" + GUILD_TOP_CHANNEL_ID + "> - Šeit ir iespējams redzēt top lietotājus ( punktus ir iespējams iegūt darot treniņus ).\n\n```Bots veidots priekš JPTC izaicinājuma, paša pieredzei un ar mērķi palīdzēt studentiem sagatavoties eksāmeniem.```")
         .setTimestamp()
         .setFooter({ text: 'Eksāmenu palīgs'});
 
-    return {
-        embeds: [booksEmbed],
-    };
+    if (command) {
+        return {
+            components: [row],
+            embeds: [booksEmbed],
+            ephemeral: true
+        };
+    } else {
+        return {
+            components: [row],
+            embeds: [booksEmbed]
+        };
+    }
 }
 
 function usersWhoCurrentlyTraining() {
@@ -498,10 +505,16 @@ function myProfileEmbed(user) {
     const row = new ActionRowBuilder()
         .addComponents(button);
 
+    let myPointsMessage = "";
+    lessons.forEach(lesson => {
+        let points = Database.getUserPointsInLesson(user.id, lesson);
+        myPointsMessage += `> **${getTitleFromLessonId(lesson)}** - ${points} punkti\n`;
+    });
+
     const topEmbed = new EmbedBuilder()
         .setColor('#ffffff')
         .setTitle('Mans profils')
-        .setDescription(`> Coins: ${databaseUser.coins}\n`)
+        .setDescription(`> Coins: ${databaseUser.coins}\n\n${myPointsMessage}`)
         .setTimestamp()
         .setThumbnail('https://cdn.discordapp.com/avatars/' + user.id + '/' + user.avatar + '.png')
         .setFooter({ text: 'Eksāmenu palīgs'});

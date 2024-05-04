@@ -3,11 +3,11 @@ const embeds = require("../../Functions/embeds");
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('profile')
-		.setDescription('Apskati savu profilu/progressu.'),
+		.setName('help')
+		.setDescription('Izskaidro, kā darbojas bots.'),
 	async execute(interaction) {
         const user = interaction.user;
 
-        await interaction.reply(embeds.myProfileEmbed(user));
+        await interaction.reply(embeds.explainBotEmbed(user));
 	},
 };

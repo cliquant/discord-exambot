@@ -7,7 +7,8 @@ module.exports = {
 	name: Events.InteractionCreate,
 	once: false,
 	async execute(interaction) {
-		if (interaction.customId.includes('answer_question_')) {
+		if (interaction.customId != null)
+		if (interaction.customId.startsWith('answer_question_')) {
 			const lesson = interaction.customId.split('_')[3];
 			const questionId = interaction.customId.split('_')[2];
 
