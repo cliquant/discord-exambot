@@ -39,7 +39,7 @@ function createTopEmbed(users) {
     let topMessage = "Šeit ir katras mācības top 5 lietotāji\n\n";
     lessons.forEach(lesson => {
         let topUsers = getTop5Users(lesson);
-        topMessage += `**${getTitleFromLessonId(lesson)}**:\n`;
+        topMessage += `> **${getTitleFromLessonId(lesson)}**:\n`;
         topUsers.forEach((user, index) => {
             topMessage += `${index + 1}. <@${user.userId}> - ${user.points} punkti\n`;
         });
@@ -61,7 +61,6 @@ function createTopEmbed(users) {
 }
 
 function createSelectLessonMenu() {
-    console.log("Creating select lesson menu")
     const lessons = getLessonsInArray();
     const options = lessons.map(lesson => {
         return new StringSelectMenuOptionBuilder()
@@ -128,7 +127,7 @@ function createStartLessonEmbed(something) {
     }
 }
 
-function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight) {
+function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight, userAnswer, disableHint = null) {
     const question = Database.getQuestionFromId(lesson, questionId);
 
     let answer;
@@ -159,12 +158,16 @@ function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight
         }
     }
     
-    
+    let something = false;
+    if (!Database.canUseHint(userId, lesson, questionId)) something = true;
+    if (disableHint != null && disableHint == true) something = true;
+    if (answered) something = true;
+
     const takeHint = new ButtonBuilder()
         .setCustomId('take_hint_' + questionId + '_' + lesson)
         .setLabel('Paņemt hint')
         .setStyle(ButtonStyle.Success)
-        .setDisabled(!Database.canUseHint(userId, lesson, questionId) || answered)
+        .setDisabled(something)
 
     let row = [];
 
@@ -187,13 +190,37 @@ function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight
             if (question.type == "text") {
                 desc += "```Atbilde: " + question.answers[0] + "```";
             } else {
-                let correctAnswer = "not finished"
-
-                desc += "```Atbilde: " +  correctAnswer + "```";
+                let correctAnswer;
+                question.select.find(answer2 => {
+                    if (answer2[Object.keys(answer2)[0]] == true) {
+                        correctAnswer = Object.keys(answer2)[0]
+                        return true;
+                    }
+                })
+                desc += "```🎯: " +  correctAnswer + "```";
             }
             desc += "\n\n" + "```🟢 Pareizi atbildēts! Tu ieguvi: " + question.reward + " punktus!" + "```";
         } else {
-            desc += "\n\nAtbilde: " + question.answers[0];
+            if (question.type == "text") {
+                desc += "```Atbilde: " + question.answers[0] + "```";
+            } else {
+                let correctAnswer;
+                question.select.find(answer1 => {
+                    if (answer1[Object.keys(answer1)[0]] == true) {
+                        correctAnswer = Object.keys(answer1)[0];
+                        return true;
+                    }
+                })
+                let userAnswer1;
+                question.select.find(answer1 => {
+                    if (answer1.id == userAnswer) {
+                        userAnswer1 = Object.keys(answer1)[0];
+                        return true;
+                    }
+                });
+                desc += "```🎯: " +  correctAnswer + "```";
+                desc += "```🫵: " +  userAnswer1 + "```";
+            }
             desc += "\n\n" + "```🔴 Nepareizi atbildēts!```";
         }
     }
@@ -353,7 +380,7 @@ function explainBotEmbed() {
     const booksEmbed = new EmbedBuilder()
         .setColor('#ffffff')
         .setTitle('Sākums')
-        .setDescription("\n\n<#" + GUILD_BOOKS_CHANNEL_ID + "> - Šaja channel ir iespējams izlasīt par kādu specifisku tēmu paskaidrojumu.\n<#" + GUILD_TRAIN_CHANNEL_ID + "> - Šeit ir iespējams sākt treniņu lai pārbaudītu savas zināšanas\n<#" + GUILD_TOP_CHANNEL_ID + "> - Šeit ir iespējams redzēt top lietotājus ( punktus ir iespējams iegūt darot treniņus )\n\n```Bots veidots priekš JPTC izaicinājuma, paša pieredzei un ar mērķi palīdzēt studentiem sagatavoties eksāmeniem.```")
+        .setDescription("\n\n> <#" + GUILD_BOOKS_CHANNEL_ID + "> - Šaja channel ir iespējams izlasīt par kādu specifisku tēmu paskaidrojumu.\n> <#" + GUILD_TRAIN_CHANNEL_ID + "> - Šeit ir iespējams sākt treniņu lai pārbaudītu savas zināšanas\n> <#" + GUILD_TOP_CHANNEL_ID + "> - Šeit ir iespējams redzēt top lietotājus ( punktus ir iespējams iegūt darot treniņus )\n\n```Bots veidots priekš JPTC izaicinājuma, paša pieredzei un ar mērķi palīdzēt studentiem sagatavoties eksāmeniem.```")
         .setTimestamp()
         .setFooter({ text: 'Eksāmenu palīgs'});
 
@@ -367,10 +394,13 @@ function usersWhoCurrentlyTraining() {
     let topMessage = "";
     lessons.forEach(lesson => {
         let activeUsers = Database.getActiveLessonUsersByType(lesson);
-        topMessage += `**${getTitleFromLessonId(lesson)}**:\n`;
+        topMessage += `> **${getTitleFromLessonId(lesson)}**:\n`;
         activeUsers.forEach(user => {
             topMessage += `<@${user[0]}> - ` + "``" + `${Database.getLessonQuestionFromId(lesson, user[2]).question}` + "``" + ` - ${Database.formatTime(Database.getStartedAt(user[0], user[1]))}\n`;
         });
+        if (activeUsers.length == 0) {
+            topMessage += "*Neviens*\n";
+        }
     });
 
     const topEmbed = new EmbedBuilder()
@@ -389,7 +419,7 @@ function lessonFinishedEmbed(userId, channelId) {
     const topEmbed = new EmbedBuilder()
         .setColor('#ffffff')
         .setTitle('Treniņš pabeigts')
-        .setDescription("Tu esi pabeidzis treniņu, šeit ir tava atbilžu vēsture. Spied uz pogas 'Beigt treniņu' lai pabeigtu pa visam šo treniņu.")
+        .setDescription("Tu esi pabeidzis treniņu, šeit ir tava atbilžu vēsture. Spied uz pogas 'Beigt treniņu' lai aizvērtu šo channel pa visam šo treniņu.")
         .setTimestamp()
         .setFooter({ text: 'Eksāmenu palīgs'});
 
@@ -409,11 +439,25 @@ function lessonFinishedEmbed(userId, channelId) {
 
     answers.forEach(answer => {
         question1++;
-        answersRight += answer.correct ? 1 : 0;
+
         emoji = answer.correct ? "🟢" : "🔴";
-        totalPoints += answer.correct ? Database.getQuestionFromId(lesson.type, answer.questionId).reward : 0;
         let question = Database.getQuestionFromId(lesson.type, answer.questionId);
-        message += "```" + "" + question.question + "\n" + "Tava atbilde: " + answer.answer + "\nPareizā atbilde: " + question.answers[0] + "```";
+        totalPoints += question.reward;
+        if (answer.correct) {
+            answersRight++;
+        }
+        if (question.type == "text") {
+            message += "```" + "" + question.question + "\n" + "Tava atbilde: " + answer.answer + "\nPareizā atbilde: " + question.answers[0] + "```";
+        } else {
+            let correctAnswer;
+            question.select.find(answer => {
+                if (answer[Object.keys(answer)[0]] == true) {
+                    correctAnswer = Object.keys(answer)[0]
+                    return true;
+                }
+            });
+            message += "```" + "" + question.question + "\n" + "Tava atbilde: " + answer.answer + "\nPareizā atbilde: " + correctAnswer + "```";
+        }
         message += "\n\n";
     });
 
@@ -445,6 +489,15 @@ function lessonFinishedEmbed(userId, channelId) {
 function myProfileEmbed(user) {
     let lessons = getLessonsInArray();
     let databaseUser = Database.getUser(user.id);
+
+    const button = new ButtonBuilder()
+        .setCustomId('my_profile_history')
+        .setLabel('Treniņu vēsture')
+        .setStyle(ButtonStyle.Secondary);
+
+    const row = new ActionRowBuilder()
+        .addComponents(button);
+
     const topEmbed = new EmbedBuilder()
         .setColor('#ffffff')
         .setTitle('Mans profils')
@@ -454,13 +507,57 @@ function myProfileEmbed(user) {
         .setFooter({ text: 'Eksāmenu palīgs'});
 
     return {
+        components: [row],
         embeds: [topEmbed],
         ephemeral: true
     };
 }
 
-function myProfileHistoryEmbed(user) {
+function myProfileHistoryEmbedChoose() {
+    const lessons = getLessonsInArray();
+    const options = lessons.map(lesson => {
+        return new StringSelectMenuOptionBuilder()
+            .setLabel(getTitleFromLessonId(lesson))
+            .setValue("select_history_lesson_" + lesson)
+    });
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('select_history_lesson')
+        .setPlaceholder('Izvēlies mācību')
+        .addOptions(options);
+
+    const button = new ButtonBuilder()
+        .setCustomId('my_profile_2')
+        .setLabel('Atpakaļ uz profilu')
+        .setStyle(ButtonStyle.Secondary);
+
+    const row = new ActionRowBuilder()
+        .addComponents(button);
     
+    const row2 = new ActionRowBuilder()
+        .addComponents(selectMenu);
+
+    const topEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Mans profils')
+        .setDescription("Izvēlies mācību kurā vēlies redzet savas atbildes treniņos.")
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    return {
+        components: [row, row2],
+        embeds: [topEmbed],
+        ephemeral: true
+    };
+}
+
+function myProfileHistoryLesson(userid, lesson) {
+    let answers = Database.getUserHistoryLessonInSpecificLesson(userid, lesson);
+
+    return {
+        content: answers.toString(),
+        ephemeral: true
+    };
 }
 
 module.exports = {
@@ -478,5 +575,6 @@ module.exports = {
     usersWhoCurrentlyTraining,
     lessonFinishedEmbed,
     myProfileEmbed,
-    myProfileHistoryEmbed
+    myProfileHistoryEmbedChoose,
+    myProfileHistoryLesson
 }

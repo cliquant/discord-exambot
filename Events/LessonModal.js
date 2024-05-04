@@ -19,24 +19,29 @@ module.exports = {
 			const questionId = interaction.customId.split('_')[2];
 			const messageId = interaction.customId.split('_')[4];
 
-			
-			console.log(interaction.customId.split('_'))
-
 			let answer = interaction.fields.getTextInputValue('answer_to_question');
 
 			let correct = Database.checkAnswer(lesson, questionId, answer);
 
 			Database.addActiveLessonHistoryAnswer(interaction.user.id, interaction.channel.id, lesson, questionId, answer, true)
 
-			await interaction.update(createQuestionEmbed(lesson, questionId, interaction.user.id, true, correct))
+			await interaction.update(createQuestionEmbed(lesson, questionId, interaction.user.id, true, correct, answer))
 
 			let nextId = Database.getLessonNextQuestionId(interaction.user.id, interaction.channel.id, lesson, questionId);
 
 			if (nextId === 'there_is_no_more_questions') {
 				await interaction.channel.send(lessonFinishedEmbed(interaction.user.id, interaction.channel.id))
-				Database.addToUserHistoryALesson(interaction.user.id, Database.getActiveLessonByChannel(interaction.channel.id))
+                await interaction.channel.send({ content: `*Šis channel tiks izdzēsts pēc 1 minutes automātiski*` })
+                Database.addUserCoins(interaction.user.id, Database.getActiveLessonRewardCountTotal(interaction.user.id, interaction.channel.id))
+				Database.addToUserLessonPoints(interaction.user.id, lesson, Database.getActiveLessonRewardCountTotal(interaction.user.id, interaction.channel.id))
+                Database.setStopTimeForActiveLesson(interaction.channel.id)
+                Database.addToUserHistoryALesson(interaction.user.id, Database.getActiveLessonByChannel(interaction.channel.id))
+                Database.deleteActiveLesson(interaction.channel.id);
+                setTimeout(() => {
+                    interaction.channel.delete();
+                }, 60000);
 			} else {
-				await interaction.channel.send(createQuestionEmbed(lesson, nextId, interaction.user.id, false, false));		
+				await interaction.channel.send(createQuestionEmbed(lesson, nextId, interaction.user.id, false, false, ''));		
 			}
 		}
     }

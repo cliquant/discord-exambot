@@ -232,7 +232,6 @@ function addUser(userId) {
     let lessonsAvailable = getLessonsInArray()
     for (let lesson of lessonsAvailable) {
         lessonsForExample[lesson] = 0
-        console.log(lessonsForExample[lesson])
     }
 
     const userExample = { 
@@ -356,6 +355,16 @@ function addActiveLesson(userId, channelId) {
     activeLessonsDatabase.sync()
 }
 
+function setStopTimeForActiveLesson(channelId) {
+    let activeLessons = getActiveLessons()
+    let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId)
+    let date = new Date()
+    let timestamp = date.getTime()
+    activeLessons[lessonIndex].stoppedAt = timestamp
+    activeLessonsDatabase.set('activeLessons', activeLessons)
+    activeLessonsDatabase.sync()
+}
+
 function deleteActiveLesson(channelId) {
     let activeLessons = getActiveLessons()
     let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId)
@@ -431,13 +440,14 @@ function getAnswerFromId(lessonName, questionId) {
 }
 
 function canUseHint(userId, lessonName, questionId) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    return lessons[lessonName].questions.find(question => question.id === questionId).hint.enabled
+    let question = getQuestionFromId(lessonName, questionId)
+    let hint = question.hint
+    return hint.enabled
 }
 
 function getHintFromId(lessonName, questionId) {
     let lessons = lessonsDatabase.get('lessons') || []
-    return lessons[lessonName].questions.find(question => question.id === questionId).hint
+    return lessons[lessonName].questions.find(question => question.id === questionId).hint.question
 }
 
 function getLessonFirstQuestionId(lessonName) {
@@ -560,7 +570,6 @@ function checkAnswer(lesson, questionId, answer) {
     } else {
         let correctAnswers = lessons[lesson].questions.find(question => question.id === questionId)
         for (let correctAnswer of correctAnswers.select) {
-            console.log(correctAnswer.id)
             if (correctAnswer.id === answer) {
                 let key = Object.keys(correctAnswer)[0];
                 let value = correctAnswer[key]
@@ -591,6 +600,13 @@ function getActiveLessonHistory(userId, channelId) {
     return activeLessons[lessonIndex].answerHistory || []
 }
 
+function getUserHistoryLessonInSpecificLesson(userId, lesson) {
+    let users = getUsers();
+    let user = getUser(userId);
+    let lessonsHistory = user.lessonsHistory || []
+    return lessonsHistory.filter(lesson => lesson.type === lesson)
+}
+
 function addToUserHistoryALesson(userId, lesson) {
     let users = getUsers();
     let user = getUser(userId);
@@ -615,10 +631,49 @@ function setLastTimeCreatedTraining(userId) {
     usersDatabase.sync()
 }
 
+function getUserLastLessonCreate(userId) {
+    let users = getUsers();
+    let user = getUser(userId);
+    return user.lastTrainingTime || 0
+}
+
 function getLastTimeCreatedTraining(userId) {
     let users = getUsers();
     let user = getUser(userId);
     return user.lastTrainingTime || 0
 }
 
-module.exports = { setLastTimeCreatedTraining, getLastTimeCreatedTraining, addToUserHistoryALesson, getActiveLessonHistory, addActiveLessonHistoryAnswer, getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray, checkAnswer}
+function addToUserLessonPoints(userId, lessonName, points) {
+    let users = usersDatabase.get('users') || []
+    let user = users.find(user => user.id === userId)
+    let userLessons = user.lessons
+    userLessons[lessonName] += points
+    usersDatabase.set('users', users)
+    usersDatabase.sync()
+}
+
+function getActiveLessonRewardCountTotal(userId, channelId) {
+    let activeLessons = getActiveLessons()
+    let lessonIndex = activeLessons.findIndex(lesson => lesson.userId === userId && lesson.channelId === channelId)
+    let answerHistory = activeLessons[lessonIndex].answerHistory || []
+    let total = 0
+    answerHistory.forEach(answer => {
+        total += answer.reward
+    })
+    return total
+}
+
+function canUserBuyHint(userId, lesson, questionId) {
+    let user = getUser(userId)
+    let hint = getHint(lesson, questionId)
+    return user.coins >= hint.cost
+}
+
+function getHint(lesson, questionId) {
+    let question = getQuestionFromId(lesson, questionId)
+    let hint = question.hint
+    return hint
+}
+
+
+module.exports = { canUserBuyHint, getHint, getActiveLessonRewardCountTotal, addToUserLessonPoints, getUserLastLessonCreate, setStopTimeForActiveLesson, getUserHistoryLessonInSpecificLesson, setLastTimeCreatedTraining, getLastTimeCreatedTraining, addToUserHistoryALesson, getActiveLessonHistory, addActiveLessonHistoryAnswer, getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray, checkAnswer}

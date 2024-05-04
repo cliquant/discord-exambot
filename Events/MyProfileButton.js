@@ -1,6 +1,6 @@
 const { ChannelType, PermissionFlagsBits, ActivityType, Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle} = require("discord.js");
 const Database = require("../Functions/database");
-const { myProfileHistoryEmbed, createStartLessonEmbed, myProfileEmbed, createSelectLessonMenu } = require("../Functions/embeds");
+const { myProfileHistoryEmbedChoose, createStartLessonEmbed, myProfileEmbed, createSelectLessonMenu } = require("../Functions/embeds");
 const { MAX_ACTIVE_LESSONS, GUILD_CATEGORY_LESSONS_ID, GUILD_ADMIN_ROLE_ID } = process.env;
 
 module.exports = {
@@ -9,10 +9,13 @@ module.exports = {
 	async execute(interaction) {
         if (!interaction.isButton()) return;
         if (interaction.customId === 'my_profile') {
-            interaction.reply(myProfileEmbed(interaction.user));
+            await interaction.reply(myProfileEmbed(interaction.user));
+        }
+        if (interaction.customId === 'my_profile_2') {
+            await interaction.update(myProfileEmbed(interaction.user));
         }
         if (interaction.customId === 'my_profile_history') {
-            interaction.reply(myProfileHistoryEmbed(interaction.user));
+            await interaction.update(myProfileHistoryEmbedChoose(interaction.user));
         }
     }
 }
