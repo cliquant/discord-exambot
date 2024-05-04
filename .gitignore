@@ -1,9 +1,5 @@
 ./node_modules
 /node_modules
 .env
-./Database/lessons.json
-./Database/users.json
-./Database/activeLessons.json
-/Database/lessons.json
-/Database/users.json
-/Database/activeLessons.json
+./Database/
+/Database/
