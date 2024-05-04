@@ -51,8 +51,11 @@ module.exports = {
             await channel_books.messages.fetch().then(messages => {
                 channel_books.bulkDelete(messages);
             });
-
-            await channel_books.send(createBooksEmbed());
+            await channel_books.send(createBooksEmbed()).then(message => {
+                setInterval(() => {
+                    message.edit(createBooksEmbed());
+                }, 1000);
+            });
 
             const channel_start = client.channels.cache.get(GUILD_START_CHANNEL_ID);
             await channel_start.messages.fetch().then(messages => {
@@ -60,9 +63,6 @@ module.exports = {
             });
 
             await channel_start.send(explainBotEmbed());
-
-
-        
         })
     }
 }

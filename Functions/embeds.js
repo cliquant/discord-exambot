@@ -677,7 +677,6 @@ function admin_CreateLessonModal(forWhat) {
     modal.addComponents(firstActionRow, secondActionRow);
 
     return modal;
-
 }
 
 function admin_addTrainingQuestionModal() {
