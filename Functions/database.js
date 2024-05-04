@@ -560,9 +560,11 @@ function checkAnswer(lesson, questionId, answer) {
     } else {
         let correctAnswers = lessons[lesson].questions.find(question => question.id === questionId)
         for (let correctAnswer of correctAnswers.select) {
-            console.log(correctAnswer)
-            if (answer === correctAnswer.toString()) {
-                return true
+            console.log(correctAnswer.id)
+            if (correctAnswer.id === answer) {
+                let key = Object.keys(correctAnswer)[0];
+                let value = correctAnswer[key]
+                return value
             }
         }
     }
@@ -602,4 +604,21 @@ function addToUserHistoryALesson(userId, lesson) {
     usersDatabase.set('users', users);
     usersDatabase.sync();
 }
-module.exports = { addToUserHistoryALesson, getActiveLessonHistory, addActiveLessonHistoryAnswer, getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray, checkAnswer}
+
+function setLastTimeCreatedTraining(userId) {
+    let users = getUsers();
+    let user = getUser(userId);
+    let date = new Date()
+    let timestamp = date.getTime()
+    user.lastTrainingTime = timestamp
+    usersDatabase.set('users', users)
+    usersDatabase.sync()
+}
+
+function getLastTimeCreatedTraining(userId) {
+    let users = getUsers();
+    let user = getUser(userId);
+    return user.lastTrainingTime || 0
+}
+
+module.exports = { setLastTimeCreatedTraining, getLastTimeCreatedTraining, addToUserHistoryALesson, getActiveLessonHistory, addActiveLessonHistoryAnswer, getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray, checkAnswer}

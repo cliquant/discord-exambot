@@ -66,6 +66,7 @@ const rest = new REST().setToken(DISCORD_BOT_TOKEN);
 })();
 
 client.on(Events.InteractionCreate, async interaction => {
+	
 	if (!interaction.isChatInputCommand()) return;
 
 	const command = interaction.client.commands.get(interaction.commandName);

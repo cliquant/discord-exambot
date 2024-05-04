@@ -184,7 +184,13 @@ function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight
 
     if (answered) {
         if (answeredRight) {
-            desc += "\n\n```Atbilde: " + question.answers[0] + "```";
+            if (question.type == "text") {
+                desc += "```Atbilde: " + question.answers[0] + "```";
+            } else {
+                let correctAnswer = "not finished"
+
+                desc += "```Atbilde: " +  correctAnswer + "```";
+            }
             desc += "\n\n" + "```🟢 Pareizi atbildēts! Tu ieguvi: " + question.reward + " punktus!" + "```";
         } else {
             desc += "\n\nAtbilde: " + question.answers[0];
@@ -453,6 +459,10 @@ function myProfileEmbed(user) {
     };
 }
 
+function myProfileHistoryEmbed(user) {
+    
+}
+
 module.exports = {
     createStartEmbed,
     createTopEmbed,
@@ -467,5 +477,6 @@ module.exports = {
     explainBotEmbed,
     usersWhoCurrentlyTraining,
     lessonFinishedEmbed,
-    myProfileEmbed
+    myProfileEmbed,
+    myProfileHistoryEmbed
 }
