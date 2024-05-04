@@ -143,7 +143,7 @@ function createQuestionEmbed(lesson, questionId, userId, answered, answeredRight
 
             selectMenu = new StringSelectMenuBuilder()
                 .setCustomId('select_lesson')
-                .setPlaceholder('Izvēlies mācību')
+                .setPlaceholder('Izvēlies atbildi')
                 .addOptions(options);
         }
     }
