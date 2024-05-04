@@ -15,16 +15,44 @@ async function prepareDatabase() {
     console.log('[DATABASE] Preparing database...')
 
     if (!usersDatabase.has('users')) {
-        usersDatabase.set('users', []);
+        const defaultUsers = []
+        usersDatabase.set('users', defaultUsers);
         usersDatabase.sync();
     }
 
     if (!booksDatabase.has('books')) {
         console.log('[DATABASE] Adding default books...')
-        const defaultBooks = {}
+        const defaultBooks = [
+            {
+                "id": "math",
+                "title": "Matemātika",
+                "topics": [
+                    {
+                        "id": "addition",
+                        "title": "Saskaitīšana",
+                        "content": "Saskaitīšana ir matemātikas operācija, kurā divi vai vairāki skaitļi tiek apvienoti vienā skaitlī, ko sauc par summu. ```2 + 3 = 5```"
+                    },
+                    {
+                        "id": "subtraction",
+                        "title": "Atnemšana",
+                        "content": "Atnemšana ir matemātikas operācija, kurā viens skaitlis tiek atņemts no cita skaitļa, lai iegūtu atlikumu. ```5 - 3 = 2```"
+                    },
+                    {
+                        "id": "multiplication",
+                        "title": "Reizināšana",
+                        "content": "Reizināšana ir matemātikas operācija, kurā divi vai vairāki skaitļi tiek apvienoti vienā skaitlī, ko sauc par reizinājumu. ```2 * 3 = 6 | (2+2+2=6)```"
+                    },
+                    {
+                        "id": "division",
+                        "title": "Dalīšana",
+                        "content": "Dalīšana ir matemātikas operācija, kurā viens skaitlis tiek sadalīts citā skaitlī, lai iegūtu kvocientu. ```6 / 3 = 2```"
+                    }
+                ]
+            }
+        ]
 
-        usersDatabase.set('users', defaultBooks);
-        usersDatabase.sync();
+        booksDatabase.set('books', defaultBooks);
+        booksDatabase.sync();
     }
 
     if (!activeLessonsDatabase.has('activeLessons')) {
@@ -213,8 +241,6 @@ async function prepareDatabase() {
         lessonsDatabase.set('lessons', defaultQuestions);
         lessonsDatabase.sync();
     }
-
-    startTimers()
 }
 
 function getLessonsInArray() {
@@ -678,4 +704,4 @@ function getHint(lesson, questionId) {
 }
 
 
-module.exports = { canUserBuyHint, getHint, getActiveLessonRewardCountTotal, addToUserLessonPoints, getUserLastLessonCreate, setStopTimeForActiveLesson, getUserHistoryLessonInSpecificLesson, setLastTimeCreatedTraining, getLastTimeCreatedTraining, addToUserHistoryALesson, getActiveLessonHistory, addActiveLessonHistoryAnswer, getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray, checkAnswer}
+module.exports = { startTimers, canUserBuyHint, getHint, getActiveLessonRewardCountTotal, addToUserLessonPoints, getUserLastLessonCreate, setStopTimeForActiveLesson, getUserHistoryLessonInSpecificLesson, setLastTimeCreatedTraining, getLastTimeCreatedTraining, addToUserHistoryALesson, getActiveLessonHistory, addActiveLessonHistoryAnswer, getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray, checkAnswer}

@@ -8,6 +8,7 @@ module.exports = {
 	once: true,
 	async execute(client) {
         Database.prepareDatabase().then(async () => {
+            Database.startTimers();
             console.log('[DATABASE] Database is ready.')
             console.log(`[CLIENT] Logged in as ${client.user.tag}.\n`)
 
