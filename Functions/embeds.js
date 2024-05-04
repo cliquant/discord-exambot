@@ -573,6 +573,117 @@ function myProfileHistoryLesson(userid, lesson) {
     };
 }
 
+function admin_ChooseLessonEmbed(forWhat) {
+    const lessons = getLessonsInArray();
+    const options = lessons.map(lesson => {
+        return new StringSelectMenuOptionBuilder()
+            .setLabel(getTitleFromLessonId(lesson))
+            .setValue("admin_select_" + lesson + "_" + forWhat)
+    });
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('select_history_lesson')
+        .setPlaceholder('Izvēlies mācību')
+        .addOptions(options);
+
+    const row2 = new ActionRowBuilder()
+        .addComponents(selectMenu);
+
+    const topEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Admin')
+        .setDescription("Izvēlies mācību.")
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    return {
+        components: [row2],
+        // embeds: [topEmbed],
+        ephemeral: true
+    };
+}
+
+function admin_addTrainingQuestionModal(number) {
+    if (number == 1) {
+        const modal = new ModalBuilder()
+            .setCustomId('add_training_question')
+            .setTitle('Pievienot jautājumu')
+            .setDescription('Pievieno jaunu jautājumu treniņiem');
+
+        const questionInput = new TextInputBuilder()
+            .setCustomId('add_training_question')
+            .setLabel('Jautājums')
+            .setStyle(TextInputStyle.Paragraph);
+
+        const typeInput = new TextInputBuilder()
+            .setCustomId('add_training_question')
+            .setLabel('Tips (text/select)')
+            .setStyle(TextInputStyle.Short);
+
+        const answersInput = new TextInputBuilder()
+            .setCustomId('add_training_question')
+            .setLabel('Atbildes (atdalīt ar ```, ja tips text - piem ```atbilde1``` ```atbilde2``` ```atbilde3``` ```atbilde4``` (pievieno beigās -true/false, ja tips ir select -- ```atbilde```-true ```atbilde2```-false)) ')
+            .setStyle(TextInputStyle.Paragraph);
+
+        const rewardInput = new TextInputBuilder()
+            .setCustomId('add_training_question')
+            .setLabel('Punkti (0-100)')
+            .setStyle(TextInputStyle.Short);
+
+        const imageInput = new TextInputBuilder()
+            .setCustomId('add_training_question')
+            .setLabel('Attēls (link) - ja nav ievadiet "none"')
+            .setStyle(TextInputStyle.Short);
+        
+        const hintEnabledInput = new TextInputBuilder()
+            .setCustomId('add_training_question')
+            .setLabel('Pievienot hint (true/false)')
+            .setStyle(TextInputStyle.Short);
+
+        const firstActionRow = new ActionRowBuilder().addComponents(questionInput);
+        const secondActionRow = new ActionRowBuilder().addComponents(typeInput);
+        const thirdActionRow = new ActionRowBuilder().addComponents(answersInput);
+        const fourthActionRow = new ActionRowBuilder().addComponents(rewardInput);
+        const fifthActionRow = new ActionRowBuilder().addComponents(imageInput);
+        const sixthActionRow = new ActionRowBuilder().addComponents(hintEnabledInput);
+
+        modal.addComponents(firstActionRow, secondActionRow, thirdActionRow, fourthActionRow, fifthActionRow, sixthActionRow);
+
+        return modal;
+    } else {
+    }
+}
+
+
+function admin_CreateLessonModal(forWhat) {
+    const modal = new ModalBuilder()
+        .setCustomId('add_training_lesson')
+        .setTitle('Pievienot mācību')
+        .setDescription('Pievieno jaunu mācību treniņiem');
+
+    const titleInput = new TextInputBuilder()
+        .setCustomId('add_training_lesson_title')
+        .setLabel('Nosaukums')
+        .setStyle(TextInputStyle.Paragraph);
+
+    const typeInput = new TextInputBuilder()
+        .setCustomId('add_training_lesson_type')
+        .setLabel('ID (1-100)')
+        .setStyle(TextInputStyle.Short);
+
+    const firstActionRow = new ActionRowBuilder().addComponents(titleInput);
+    const secondActionRow = new ActionRowBuilder().addComponents(typeInput);
+
+    modal.addComponents(firstActionRow, secondActionRow);
+
+    return modal;
+
+}
+
+function admin_addTrainingQuestionModal() {
+    // 1 input = 
+}
+
 module.exports = {
     createStartEmbed,
     createTopEmbed,
@@ -589,5 +700,8 @@ module.exports = {
     lessonFinishedEmbed,
     myProfileEmbed,
     myProfileHistoryEmbedChoose,
-    myProfileHistoryLesson
+    myProfileHistoryLesson,
+    admin_addTrainingQuestionModal,
+    admin_ChooseLessonEmbed,
+    admin_CreateLessonModal
 }

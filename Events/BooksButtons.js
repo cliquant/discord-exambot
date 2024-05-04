@@ -7,6 +7,7 @@ module.exports = {
 	name: Events.InteractionCreate,
 	once: false,
 	async execute(interaction) {
+
         if (!interaction.isButton()) return;
         if (interaction.customId === 'start_books') {
             await interaction.reply(bookFirstPage());

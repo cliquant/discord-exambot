@@ -10,7 +10,8 @@ module.exports = {
 				.setDescription('Izvēlies')
 				.setRequired(true)
 				.addChoices(
-					{ name: 'question', value: 'training_question' }
+					{ name: 'question', value: 'trainingQuestion' },
+                    { name: 'lesson', value: 'trainingLesson' },
 				))
 		.addStringOption(option =>
 			option.setName('option')
@@ -27,9 +28,16 @@ module.exports = {
 		const type = interaction.options.getString('type');
 		const option = interaction.options.getString('option');
 
-        if (type == 'training_question') {
-            
+        if (type == 'trainingQuestion') {
+            let forWhat = 'trainingQuestion_' + option;
+            await interaction.reply(embeds.admin_ChooseLessonEmbed(forWhat));
         }
-		interaction.reply({ content: `Tu izvēlējies ${type} un ${option}.`, ephemeral: true });
+
+        if (type == 'trainingLesson') {
+            let forWhat = 'trainingLesson_' + option;
+            if (option == 'add') {
+                await interaction.showModal(embeds.admin_CreateLessonModal(forWhat));
+            }
+        }
 	},
 };

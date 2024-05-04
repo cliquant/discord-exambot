@@ -237,6 +237,8 @@ function addUser(userId) {
     const userExample = { 
         id: userId,
         coins: 5,
+        lessonsHistory: [],
+        lastTrainingTime: 0,
         lessons: lessonsForExample
     }
 
