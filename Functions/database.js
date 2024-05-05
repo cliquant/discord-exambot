@@ -1,8 +1,130 @@
-const { addUserCoins, updateAllUserLessons, addToUserLesson, addLesson, addLessonPoint, addActiveLesson, setActiveLessonType, addActiveLessonHistoryAnswer, setStopTimeForActiveLesson, addToUserHistoryALesson, setLastTimeCreatedTraining, addToUserLessonPoints, addUser } = require('./database/add.js');
-const { getLessonsInArray, getUsers, getTop5Users, getUserPointsInLesson, getTitleFromLessonId, getUserActiveLessonCount, getUser, getLessonQuestionCount, getLessonQuestions, getActiveLessons, getActiveLessonCount, getActiveLessonByChannel, getQuestionFromId, getAnswerFromId, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getLessonQuestionFromId, getBookLessonTitleFromId, getBookLessonsIdsInArray, getBookContent, getTopicIdsInArray, getTopicTitleFromId, getTopicContentFromId, getActiveLessonUsersByType, getStartedAt, getActiveLessonHistory, getUserHistoryLessonInSpecificLesson, getUserLastLessonCreate, getLastTimeCreatedTraining, getActiveLessonRewardCountTotal, getHint } = require('./database/get.js');
-const { removeUserCoins, removeActiveLesson, deleteActiveLesson } = require('./database/remove.js');
-const { canUserBuyHint, checkAnswer, canUseHint, isThisChannelLessonActive, doesUserHaveEnoughCoins } = require('./database/check.js');
-const { formatTime } = require('./other.js');
-const { prepareDatabase, startTimers } = require('./database/load.js');
+const {
+    addUserCoins,
+    updateAllUserLessons,
+    addToUserLesson,
+    addLesson,
+    addLessonPoint,
+    addActiveLesson,
+    setActiveLessonType,
+    addActiveLessonHistoryAnswer,
+    setStopTimeForActiveLesson,
+    addToUserHistoryALesson,
+    setLastTimeCreatedTraining,
+    addToUserLessonPoints,
+    addUser
+} = require('./database/add.js');
+const {
+    getLessonsInArray,
+    getUsers,
+    getTop5Users,
+    getUserPointsInLesson,
+    getTitleFromLessonId,
+    getUserActiveLessonCount,
+    getUser,
+    getLessonQuestionCount,
+    getLessonQuestions,
+    getActiveLessons,
+    getActiveLessonCount,
+    getActiveLessonByChannel,
+    getQuestionFromId,
+    getAnswerFromId,
+    getHintFromId,
+    getLessonFirstQuestionId,
+    getLessonNextQuestionId,
+    getLessonQuestionFromId,
+    getBookLessonTitleFromId,
+    getBookLessonsIdsInArray,
+    getBookContent,
+    getTopicIdsInArray,
+    getTopicTitleFromId,
+    getTopicContentFromId,
+    getActiveLessonUsersByType,
+    getStartedAt,
+    getActiveLessonHistory,
+    getUserHistoryLessonInSpecificLesson,
+    getUserLastLessonCreate,
+    getLastTimeCreatedTraining,
+    getActiveLessonRewardCountTotal,
+    getHint
+} = require('./database/get.js');
+const {
+    removeUserCoins,
+    removeActiveLesson,
+    deleteActiveLesson
+} = require('./database/remove.js');
+const {
+    canUserBuyHint,
+    checkAnswer,
+    canUseHint,
+    isThisChannelLessonActive,
+    doesUserHaveEnoughCoins
+} = require('./database/check.js');
+const {
+    formatTime
+} = require('./other.js');
+const {
+    prepareDatabase,
+    startTimers
+} = require('./database/load.js');
 
-module.exports = { startTimers, canUserBuyHint, getHint, getActiveLessonRewardCountTotal, addToUserLessonPoints, getUserLastLessonCreate, setStopTimeForActiveLesson, getUserHistoryLessonInSpecificLesson, setLastTimeCreatedTraining, getLastTimeCreatedTraining, addToUserHistoryALesson, getActiveLessonHistory, addActiveLessonHistoryAnswer, getLessonQuestionFromId, formatTime, getStartedAt, getActiveLessonUsersByType, getTopicContentFromId, getBookContent, getBookLessonsIdsInArray, getBookLessonTitleFromId, setActiveLessonType, removeActiveLesson, getUserActiveLessonCount, getTitleFromLessonId, prepareDatabase, addUser, addUserCoins, getUser, getLessonsInArray, removeUserCoins, addLesson, addLessonPoint, updateAllUserLessons, getUsers, addToUserLesson, getActiveLessonCount, getActiveLessonByChannel, addActiveLesson, deleteActiveLesson, isThisChannelLessonActive, getLessonQuestions, getTop5Users, getUserPointsInLesson, doesUserHaveEnoughCoins, getLessonQuestionCount, getActiveLessons, getQuestionFromId, getAnswerFromId, canUseHint, getHintFromId, getLessonFirstQuestionId, getLessonNextQuestionId, getTopicTitleFromId, getTopicIdsInArray, checkAnswer}
+
+
+
+module.exports = {
+    startTimers,
+    canUserBuyHint,
+    getHint,
+    getActiveLessonRewardCountTotal,
+    addToUserLessonPoints,
+    getUserLastLessonCreate,
+    setStopTimeForActiveLesson,
+    getUserHistoryLessonInSpecificLesson,
+    setLastTimeCreatedTraining,
+    getLastTimeCreatedTraining,
+    addToUserHistoryALesson,
+    getActiveLessonHistory,
+    addActiveLessonHistoryAnswer,
+    getLessonQuestionFromId,
+    formatTime,
+    getStartedAt,
+    getActiveLessonUsersByType,
+    getTopicContentFromId,
+    getBookContent,
+    getBookLessonsIdsInArray,
+    getBookLessonTitleFromId,
+    setActiveLessonType,
+    removeActiveLesson,
+    getUserActiveLessonCount,
+    getTitleFromLessonId,
+    prepareDatabase,
+    addUser,
+    addUserCoins,
+    getUser,
+    getLessonsInArray,
+    removeUserCoins,
+    addLesson,
+    addLessonPoint,
+    updateAllUserLessons,
+    getUsers,
+    addToUserLesson,
+    getActiveLessonCount,
+    getActiveLessonByChannel,
+    addActiveLesson,
+    deleteActiveLesson,
+    isThisChannelLessonActive,
+    getLessonQuestions,
+    getTop5Users,
+    getUserPointsInLesson,
+    doesUserHaveEnoughCoins,
+    getLessonQuestionCount,
+    getActiveLessons,
+    getQuestionFromId,
+    getAnswerFromId,
+    canUseHint,
+    getHintFromId,
+    getLessonFirstQuestionId,
+    getLessonNextQuestionId,
+    getTopicTitleFromId,
+    getTopicIdsInArray,
+    checkAnswer
+}
