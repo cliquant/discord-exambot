@@ -1,6 +1,7 @@
 // Bot Author: @cliquant -- https://github.com/cliquant
 
 require('dotenv').config()
+const figlet = require("figlet");
 const { Client, Intents, GatewayIntentBits, EmbedBuilder, Partials, Events, ActivityType, Collection, REST, Routes } = require('discord.js');
 const fs = require("fs");
 const path = require('path');
@@ -15,6 +16,13 @@ const client = new Client({
           GatewayIntentBits.GuildMembers,
     ],
     partials: [Partials.Channel],
+});
+
+figlet("JPTC", function (err, data) {
+	if (err) {
+	  return;
+	}
+	console.log("\x1b[33m" + data + "\x1b[0m");
 });
 
 client.commands = new Collection();
