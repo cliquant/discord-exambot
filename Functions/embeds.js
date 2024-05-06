@@ -1,4 +1,4 @@
-const { ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle} = require("discord.js");
+const { ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, messageLink} = require("discord.js");
 const { getTop5Users, getLessonsInArray, getTitleFromLessonId } = require("./database");
 const Database = require("./database");
 const { GUILD_BOOKS_CHANNEL_ID, GUILD_TRAIN_CHANNEL_ID, GUILD_TOP_CHANNEL_ID, GUILD_START_CHANNEL_ID } = process.env;
@@ -444,17 +444,22 @@ function lessonFinishedEmbed(userId, channelId) {
 
     fromAnswers = answers.length;
 
+    message += "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯";
+
     answers.forEach(answer => {
         question1++;
 
         emoji = answer.correct ? "🟢" : "🔴";
         let question = Database.getQuestionFromId(lesson.type, answer.questionId);
-        totalPoints += question.reward;
+        console.log(answer)
+        console.log(question)
         if (answer.correct) {
             answersRight++;
+            totalPoints += question.reward;
         }
+        let isLast = question1 == fromAnswers;
         if (question.type == "text") {
-            message += "```" + "" + question.question + "\n" + "Tava atbilde: " + answer.answer + "\nPareizā atbilde: " + question.answers[0] + "```";
+            message += "```" + "" + question.question + "```" + "\n> Tava atbilde: **" + answer.answer + "** " + emoji + "\n> Pareizā atbilde: **" + question.answers[0] + "**";
         } else {
             let correctAnswer;
             question.select.find(answer => {
@@ -463,13 +468,25 @@ function lessonFinishedEmbed(userId, channelId) {
                     return true;
                 }
             });
-            message += "```" + "" + question.question + "\n" + "Tava atbilde: " + answer.answer + "\nPareizā atbilde: " + correctAnswer + "```";
+            let yourAnswer;
+            question.select.find(answer1 => {
+                if (answer1.id == answer.answer) {
+                    yourAnswer = Object.keys(answer1)[0]
+                    return true;
+                }
+            });
+            message += "```" + "" + question.question + "```" + "\n> Tava atbilde: **" + yourAnswer + "** " + emoji + "\n> Pareizā atbilde: **" + correctAnswer + "**";
         }
-        message += "\n\n";
+
+        if (isLast) {
+            message += "\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n";
+        } else {
+            message += "\n";
+        }
     });
 
-    message += "```Tu esi atbildējis pareizi uz " + answersRight + " no " + fromAnswers + " jautājumiem!```\n";
-    message += "```Tu esi ieguvis kopā " + totalPoints + " punktus!```";
+    message += "> Tu esi atbildējis pareizi uz **" + answersRight + "** no **" + fromAnswers + "** jautājumiem!\n";
+    message += "> Tu esi ieguvis kopā **" + totalPoints + "** punktus!";
 
 
     const topEmbed2 = new EmbedBuilder()
@@ -564,13 +581,180 @@ function myProfileHistoryEmbedChoose() {
     };
 }
 
-function myProfileHistoryLesson(userid, lesson) {
-    let answers = Database.getUserHistoryLessonInSpecificLesson(userid, lesson);
+function myProfileHistoryLesson(userid, lesson, page) {
+    const user = Database.getUser(userid);
+    const history = Database.getUserHistoryLessonInSpecificLesson(userid, lesson) || [];
+    let lessonTitle = getTitleFromLessonId(lesson);
+    let codePage = parseInt(page) - 1;
+    let historyLesson = history[codePage]
 
-    return {
-        content: answers.toString(),
-        ephemeral: true
-    };
+    function doesHaveNextPage() {
+        if (history[codePage + 1]) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function doesHavePreviousPage() {
+        if (history[codePage - 1]) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    let maxPage = history.length;
+    if (maxPage == 0) {
+        const button = new ButtonBuilder()
+            .setCustomId('my_profile_history')
+            .setLabel('Atpakaļ uz izvēli')
+            .setStyle(ButtonStyle.Secondary);
+
+        const row = new ActionRowBuilder()
+            .addComponents(button);
+
+        const topEmbed = new EmbedBuilder()
+            .setColor('#ffffff')
+            .setTitle(`Atbilžu vēsture - ${page} - ${lessonTitle}`)
+            .setDescription("Tu vēl neesi ne reizi trenējies šajā mācībā.")
+            .setTimestamp()
+            .setFooter({ text: 'Eksāmenu palīgs'});
+
+        return {
+            components: [row],
+            embeds: [topEmbed],
+            ephemeral: true
+        };
+    } else {
+        let topEmbed;
+        let row2;
+
+        const button = new ButtonBuilder()
+            .setCustomId('my_profile_history')
+            .setLabel('Atpakaļ uz izvēli')
+            .setStyle(ButtonStyle.Secondary)
+
+        row2 = new ActionRowBuilder()
+
+        if (!historyLesson) {
+            topEmbed = new EmbedBuilder()
+                .setColor('#ffffff')
+                .setTitle(`Atbilžu vēsture - ${page} - ${lessonTitle}`)
+                .setDescription("```Tu vēl neesi ne reizi trenējies šajā mācībā.```")
+                .setTimestamp()
+                .setFooter({ text: 'Eksāmenu palīgs'});
+            row2.addComponents(button);
+        } else {
+
+            message = "";
+
+            let answers = historyLesson.answerHistory;
+
+            question1 = 0;
+
+            totalPoints = 0;
+        
+            answersRight = 0;
+        
+            fromAnswers = answers.length;
+
+            message += "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯";
+        
+            answers.forEach(answer => {
+                question1++;
+        
+                emoji = answer.correct ? "🟢" : "🔴";
+                let question = Database.getQuestionFromId(lesson, answer.questionId);
+                if (answer.correct) {
+                    answersRight++;
+                    totalPoints += question.reward;
+                }
+                let isLast = question1 == fromAnswers;
+                if (question.type == "text") {
+                    message += "```" + "" + question.question + "```" + "\n> Tava atbilde: **" + answer.answer  + "** " + emoji + "\n> Pareizā atbilde: **" + question.answers[0] + "**";
+                } else {
+                    let correctAnswer;
+                    question.select.find(answer => {
+                        if (answer[Object.keys(answer)[0]] == true) {
+                            correctAnswer = Object.keys(answer)[0]
+                            return true;
+                        }
+                    });
+                    let yourAnswer;
+                    question.select.find(answer1 => {
+                        if (answer1.id == answer.answer) {
+                            yourAnswer = Object.keys(answer1)[0]
+                            return true;
+                        }
+                    });
+                    message += "```" + "" + question.question + "```" + "\n> Tava atbilde: **" + yourAnswer + "** " + emoji + "\n> Pareizā atbilde: **" + correctAnswer + "**";
+                }
+                if (isLast) {
+                    message += "\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n";
+                } else {
+                    message += "\n";
+                }
+            });
+        
+            message += "> Tu esi atbildējis pareizi uz **" + answersRight + "** no **" + fromAnswers + "** jautājumiem!\n";
+            message += "> Tu esi ieguvis kopā **" + totalPoints + "** punktus!";
+
+            let start_date = new Date(historyLesson.startedAt);
+            let start_date1 =
+              start_date.getDate().toString().padStart(2, '0') + "/" +
+              (start_date.getMonth() + 1).toString().padStart(2, '0') + "/" +
+              start_date.getFullYear() + " " +
+              start_date.getHours().toString().padStart(2, '0') + ":" +
+              start_date.getMinutes().toString().padStart(2, '0');
+            
+            let end_date1;
+            if (historyLesson.stoppedAt != null) {
+              let end_date = new Date(historyLesson.stoppedAt);
+              end_date1 =
+                end_date.getDate().toString().padStart(2, '0') + "." +
+                (end_date.getMonth() + 1).toString().padStart(2, '0') + "." +
+                end_date.getFullYear() + " " +
+                end_date.getHours().toString().padStart(2, '0') + ":" +
+                end_date.getMinutes().toString().padStart(2, '0');
+            } else {
+              end_date1 = "❌";
+            }
+            topEmbed = new EmbedBuilder()
+                .setColor('#ffffff')
+                .setTitle(`Atbilžu vēsture - ${page} - ${lessonTitle}`)
+                .setDescription("```Treniņš #" + page + "```\n" + "> **" + lessonTitle + "**\n" + `> Sākts: **${start_date1}**\n> Beigts: **${end_date1}**` + "\n\n" + message)
+                .setTimestamp()
+                .setFooter({ text: 'Eksāmenu palīgs'}); 
+
+            let nextPageNumber = parseInt(page) + 1;
+            let previousPageNumber = parseInt(page) - 1;
+
+            const button_backward = new ButtonBuilder()
+                .setCustomId('my_profile_history_' + lesson + '_' + (previousPageNumber))
+                .setLabel('←')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(!doesHavePreviousPage());
+
+
+            const button_forward = new ButtonBuilder()
+                .setCustomId('my_profile_history_' + lesson + '_' + (nextPageNumber))
+                .setLabel('→')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(!doesHaveNextPage());
+
+            row2.addComponents(button_backward);
+            row2.addComponents(button);
+            row2.addComponents(button_forward);
+            
+        }
+
+        return {
+            embeds: [topEmbed],
+            components: [row2],
+            ephemeral: true
+        };
+    }
 }
 
 function admin_ChooseLessonEmbed(forWhat) {

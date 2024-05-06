@@ -67,9 +67,6 @@ const {
     startTimers
 } = require('./database/load.js');
 
-
-
-
 module.exports = {
     startTimers,
     canUserBuyHint,

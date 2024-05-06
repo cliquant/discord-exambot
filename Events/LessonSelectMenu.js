@@ -29,7 +29,8 @@ module.exports = {
 
             await interaction.update(createQuestionEmbed(lesson, questionId, interaction.user.id, true, correct, selectAnswerId));
 
-            Database.addActiveLessonHistoryAnswer(interaction.user.id, interaction.channel.id, lesson, questionId, selectAnswerId, true)
+         // Database.addActiveLessonHistoryAnswer(interaction.user.id, interaction.channel.id, lesson, questionId, answer, true)
+            Database.addActiveLessonHistoryAnswer(interaction.user.id, interaction.channel.id, lesson, questionId, selectAnswerId, correct)
 
 			let nextId = Database.getLessonNextQuestionId(interaction.user.id, interaction.channel.id, lesson, questionId);
 

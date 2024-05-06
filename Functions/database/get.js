@@ -1,9 +1,6 @@
 const moment = require('moment');
 const JSONdb = require('simple-json-db');
-const usersDatabase = new JSONdb('./Database/users.json');
-const lessonsDatabase = new JSONdb('./Database/lessons.json');
-const activeLessonsDatabase = new JSONdb('./Database/activeLessons.json');
-const booksDatabase = new JSONdb('./Database/books.json');
+const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../other.js');
 
 function getLessonsInArray() {
     let lessons = lessonsDatabase.get('lessons') || []
@@ -204,8 +201,9 @@ function getActiveLessonHistory(userId, channelId) {
 function getUserHistoryLessonInSpecificLesson(userId, lesson) {
     let users = getUsers();
     let user = getUser(userId);
-    let lessonsHistory = user.lessonsHistory || []
-    return lessonsHistory.filter(lesson => lesson.type === lesson)
+    let userHistory = user.lessonsHistory || []
+    let lessonHistory = userHistory.filter(history => history.type === lesson)
+    return lessonHistory || []
 }
 
 function getUserLastLessonCreate(userId) {

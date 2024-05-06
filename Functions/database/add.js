@@ -1,10 +1,7 @@
 const moment = require('moment');
 const JSONdb = require('simple-json-db');
-const usersDatabase = new JSONdb('./Database/users.json');
-const lessonsDatabase = new JSONdb('./Database/lessons.json');
-const activeLessonsDatabase = new JSONdb('./Database/activeLessons.json');
-const booksDatabase = new JSONdb('./Database/books.json');
-const { getLessonsInArray } = require('./get');
+const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../other.js');
+const { getLessonsInArray, getUser, getUsers, getActiveLessons } = require('./get');
 
 function addUserCoins(userId, points) {
     let users = usersDatabase.get('users') || []

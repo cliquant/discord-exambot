@@ -1,9 +1,8 @@
 const moment = require('moment');
 const JSONdb = require('simple-json-db');
 const usersDatabase = new JSONdb('./Database/users.json');
-const lessonsDatabase = new JSONdb('./Database/lessons.json');
 const activeLessonsDatabase = new JSONdb('./Database/activeLessons.json');
-const booksDatabase = new JSONdb('./Database/books.json');
+const { getLessonsInArray, getUser, getUsers, getActiveLessons } = require('./get');
 
 function deleteActiveLesson(channelId) {
     let activeLessons = getActiveLessons()

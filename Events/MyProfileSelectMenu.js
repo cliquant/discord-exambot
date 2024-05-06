@@ -12,7 +12,7 @@ module.exports = {
             let lesson = interaction.values[0].split('_')[3];
             let user = interaction.user.id;
 
-            await interaction.update(myProfileHistoryLesson(user, lesson));
+            await interaction.update(myProfileHistoryLesson(user, lesson, 1));
         }
     }
 }

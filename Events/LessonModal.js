@@ -24,7 +24,7 @@ module.exports = {
 
 			let correct = Database.checkAnswer(lesson, questionId, answer);
 
-			Database.addActiveLessonHistoryAnswer(interaction.user.id, interaction.channel.id, lesson, questionId, answer, true)
+			Database.addActiveLessonHistoryAnswer(interaction.user.id, interaction.channel.id, lesson, questionId, answer, correct)
 
 			await interaction.update(createQuestionEmbed(lesson, questionId, interaction.user.id, true, correct, answer))
 
