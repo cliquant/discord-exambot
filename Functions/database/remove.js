@@ -27,8 +27,30 @@ function removeActiveLesson(userId, channelId) {
     }
 }
 
+function deleteTrainingLesson(lessonId) {
+    let lessons = getLessonsInArray()
+    let lessonIndex = lessons.findIndex(lesson => lesson.id === lessonId)
+    if (lessonIndex === -1) return
+    lessons.splice(lessonIndex, 1)
+    lessonsDatabase.set('lessons', lessons)
+    lessonsDatabase.sync()
+}
+
+function deleteTrainingQuestion(lesson, questionId) {
+    let lessons = getLessonsInArray()
+    let lessonIndex = lessons.findIndex(lesson => lesson.id === lessonId)
+    if (lessonIndex === -1) return
+    let questionIndex = lessons[lessonIndex].questions.findIndex(question => question.id === questionId)
+    if (questionIndex === -1) return
+    lessons[lessonIndex].questions.splice(questionIndex, 1)
+    lessonsDatabase.set('lessons', lessons)
+    lessonsDatabase.sync()
+}
+
 module.exports = {
     removeUserCoins,
     removeActiveLesson,
-    deleteActiveLesson
+    deleteActiveLesson,
+    deleteTrainingLesson,
+    deleteTrainingQuestion
 }

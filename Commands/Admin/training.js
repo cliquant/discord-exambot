@@ -29,15 +29,21 @@ module.exports = {
 		const option = interaction.options.getString('option');
 
         if (type == 'trainingQuestion') {
-            let forWhat = 'trainingQuestion_' + option;
+            let forWhat = 'trainingQuestion-' + option;
             await interaction.reply(embeds.admin_ChooseLessonEmbed(forWhat));
         }
 
         if (type == 'trainingLesson') {
-            let forWhat = 'trainingLesson_' + option;
+            let forWhat = 'trainingLesson-' + option;
             if (option == 'add') {
                 await interaction.showModal(embeds.admin_CreateLessonModal(forWhat));
             }
+			if (option == 'delete') {
+				await interaction.reply(embeds.admin_ChooseLessonEmbed(forWhat));
+			}
+			if (option == 'edit') {
+				await interaction.reply(embeds.admin_ChooseLessonEmbed(forWhat));
+			}
         }
 	},
 };

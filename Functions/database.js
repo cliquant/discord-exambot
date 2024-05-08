@@ -11,7 +11,9 @@ const {
     addToUserHistoryALesson,
     setLastTimeCreatedTraining,
     addToUserLessonPoints,
-    addUser
+    addUser,
+    addTrainingLesson,
+    renameTrainingLessonTitle
 } = require('./database/add.js');
 const {
     getLessonsInArray,
@@ -45,12 +47,15 @@ const {
     getUserLastLessonCreate,
     getLastTimeCreatedTraining,
     getActiveLessonRewardCountTotal,
-    getHint
+    getHint,
+    getTrainingLessonById
 } = require('./database/get.js');
 const {
     removeUserCoins,
     removeActiveLesson,
-    deleteActiveLesson
+    deleteActiveLesson,
+    deleteTrainingLesson,
+    deleteTrainingQuestion
 } = require('./database/remove.js');
 const {
     canUserBuyHint,
@@ -123,5 +128,10 @@ module.exports = {
     getLessonNextQuestionId,
     getTopicTitleFromId,
     getTopicIdsInArray,
-    checkAnswer
+    checkAnswer,
+    addTrainingLesson,
+    getTrainingLessonById,
+    deleteTrainingLesson, 
+    renameTrainingLessonTitle,
+    deleteTrainingQuestion
 }

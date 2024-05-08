@@ -159,6 +159,27 @@ function addUser(userId) {
     }
 }
 
+function addTrainingLesson(title, type, id) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    let lesson = {
+        title: title,
+        type: type,
+        id: id,
+        questions: []
+    }
+    lessons.push(lesson)
+    lessonsDatabase.set('lessons', lessons)
+    lessonsDatabase.sync()
+}
+
+function renameTrainingLessonTitle(lessonId, title) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    let lesson = lessons[lessonId]
+    lesson.title = title
+    lessonsDatabase.set('lessons', lessons)
+    lessonsDatabase.sync()
+}
+
 module.exports = {
     addUserCoins,
     updateAllUserLessons,
@@ -172,5 +193,7 @@ module.exports = {
     addToUserHistoryALesson,
     setLastTimeCreatedTraining,
     addToUserLessonPoints,
-    addUser
+    addUser,
+    addTrainingLesson,
+    renameTrainingLessonTitle
 }

@@ -88,6 +88,11 @@ function getHintFromId(lessonName, questionId) {
     return lessons[lessonName].questions.find(question => question.id === questionId).hint.question
 }
 
+function getTrainingLessonById(id) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    return lessons[id] || null
+}
+
 function getLessonFirstQuestionId(lessonName) {
     let questions = getLessonQuestions(lessonName)
     return questions[0].id
@@ -267,5 +272,6 @@ module.exports = {
     getUserLastLessonCreate,
     getLastTimeCreatedTraining,
     getActiveLessonRewardCountTotal,
-    getHint
+    getHint,
+    getTrainingLessonById
 }
