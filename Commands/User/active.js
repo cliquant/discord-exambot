@@ -3,11 +3,9 @@ const embeds = require("../../Functions/embeds");
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('profile')
-		.setDescription('Apskati savu profilu/progresu.'),
+		.setName('active')
+		.setDescription('Apskati aktīvos lietotājus kuri šobrīd trenējas. 📊'),
 	async execute(interaction) {
-        const user = interaction.user;
-
-        await interaction.reply(embeds.myProfileEmbed(user));
+        await interaction.reply(embeds.usersWhoCurrentlyTraining(true));
 	},
 };

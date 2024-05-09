@@ -1,9 +1,9 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, messageLink} = require("discord.js");
 const { getTop5Users, getLessonsInArray, getTitleFromLessonId } = require("./database");
 const Database = require("./database");
-const { GUILD_BOOKS_CHANNEL_ID, GUILD_TRAIN_CHANNEL_ID, GUILD_TOP_CHANNEL_ID, GUILD_START_CHANNEL_ID } = process.env;
+const { GUILD_BOOKS_CHANNEL_ID, GUILD_TRAIN_CHANNEL_ID, GUILD_TOP_CHANNEL_ID, GUILD_START_CHANNEL_ID, START_CHANNEL_ENABLED, BOOKS_CHANNEL_ENABLD, TOP_CHANNEL_ENABLED, TRAINING_CHANNEL_ENABLED } = process.env;
 
-function createStartEmbed() {
+function createStartEmbed(boolean = false) {
     const start = new ButtonBuilder()
         .setCustomId('start_lesson')
         .setLabel('Sākt treniņu')
@@ -22,10 +22,11 @@ function createStartEmbed() {
     return {
         embeds: [exampleEmbed],
         components: [row],
+        ephemeral: boolean
     };
 }
 
-function createTopEmbed(users) {
+function createTopEmbed(boolean = false) {
     let lessons = getLessonsInArray();
     let topMessage = "Šeit ir katras mācības top 5 lietotāji\n\n";
     lessons.forEach(lesson => {
@@ -46,7 +47,8 @@ function createTopEmbed(users) {
         .setFooter({ text: 'Eksāmenu palīgs'});
 
     return {
-        embeds: [topEmbed]
+        embeds: [topEmbed],
+        ephemeral: boolean
     };
 }
 
@@ -73,7 +75,6 @@ function createSelectLessonMenu() {
 }
 
 function createStartLessonEmbed(something) {
-
     const end = new ButtonBuilder()
         .setCustomId('end_lesson')
         .setLabel('Beigt treniņu')
@@ -259,7 +260,7 @@ function createAnswerModal(lesson, questionId, messageId) {
     return modal;
 }
 
-function createBooksEmbed() {
+function createBooksEmbed(boolean = false) {
     const button = new ButtonBuilder()
         .setCustomId('start_books')
         .setLabel('Sākt mācīties')
@@ -278,6 +279,7 @@ function createBooksEmbed() {
     return {
         components: [row],
         embeds: [booksEmbed],
+        ephemeral: boolean
     };
 
 }
@@ -375,10 +377,40 @@ function explainBotEmbed(command = null) {
     const row = new ActionRowBuilder()
         .addComponents(button);
 
+    let books_channel_message = "";
+    let top_channel_message = "";
+    let training_channel_message = "";
+
+    if (BOOKS_CHANNEL_ENABLD == "true") {
+        books_channel_message = "> <#" + GUILD_BOOKS_CHANNEL_ID + "> - Šajā channel ir iespējams izlasīt par kādu specifisku tēmu paskaidrojumu.\n";
+    }
+    if (TRAINING_CHANNEL_ENABLED == "true") {
+        training_channel_message = "> <#" + GUILD_TRAIN_CHANNEL_ID + "> - Šajā channel ir iespējams sākt treniņu lai pārbaudītu savas zināšanas.\n";
+    }
+    if (START_CHANNEL_ENABLED == "true") {
+        top_channel_message = "> <#" + GUILD_TOP_CHANNEL_ID + "> - Šeit ir iespējams redzēt top lietotājus ( punktus ir iespējams iegūt darot treniņus ).\n";
+    }
+
+    let commands = {
+        "help": "Izskaidro, kā darbojas bots. ( šis pats message )",
+        "profile": "Apskati savu profilu/progresu.",
+        "top": "Ar šo komandu ir iespējams redzēt top lietotājus ( punktus ir iespējams iegūt darot treniņus ).",
+        "books": "Ar šo komandu ir iespējams izlasīt (grāmatu) par kādu specifisku tēmu paskaidrojumu.",
+        "train": "Ar šo komandu ir iespējams sākt treniņu lai pārbaudītu savas zināšanas.",
+        "stop": "Ar šo komandu ir iespējams pārtraukt treniņu.",
+        "active": "Ar šo komandu ir iespējams redzēt, kas šobrīd trenējas."
+    }
+
+    let commandsMessage = "";
+
+    for (const [key, value] of Object.entries(commands)) {
+        commandsMessage += `> **/${key}** - ${value}\n`;
+    }
+
     const booksEmbed = new EmbedBuilder()
         .setColor('#ffffff')
         .setTitle('Sākums')
-        .setDescription("\n\n> <#" + GUILD_BOOKS_CHANNEL_ID + "> - Šaja channel ir iespējams izlasīt par kādu specifisku tēmu paskaidrojumu.\n> <#" + GUILD_TRAIN_CHANNEL_ID + "> - Šeit ir iespējams sākt treniņu lai pārbaudītu savas zināšanas\n> <#" + GUILD_TOP_CHANNEL_ID + "> - Šeit ir iespējams redzēt top lietotājus ( punktus ir iespējams iegūt darot treniņus ).\n\n```Bots veidots priekš JPTC izaicinājuma, paša pieredzei un ar mērķi palīdzēt studentiem sagatavoties eksāmeniem.```")
+        .setDescription("\n\n" + books_channel_message + training_channel_message + top_channel_message + "\n\n" + commandsMessage + "\n\n```Bots veidots priekš JPTC izaicinājuma, paša pieredzei un ar mērķi palīdzēt studentiem sagatavoties eksāmeniem.```")
         .setTimestamp()
         .setFooter({ text: 'Eksāmenu palīgs'});
 
@@ -396,7 +428,7 @@ function explainBotEmbed(command = null) {
     }
 }
 
-function usersWhoCurrentlyTraining() {
+function usersWhoCurrentlyTraining(boolean = false) {
     let lessons = getLessonsInArray();
     let topMessage = "";
     lessons.forEach(lesson => {
@@ -419,6 +451,7 @@ function usersWhoCurrentlyTraining() {
 
     return {
         embeds: [topEmbed],
+        ephemeral: boolean
     };
 }
 
