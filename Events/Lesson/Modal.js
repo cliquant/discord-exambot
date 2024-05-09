@@ -1,13 +1,8 @@
-const { ChannelType, PermissionFlagsBits, ActivityType, Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle} = require("discord.js");
-const Database = require("../Functions/database");
-const { lessonFinishedEmbed, createQuestionEmbed, createAnswerModal } = require("../Functions/embeds");
-const { MAX_ACTIVE_LESSONS, GUILD_CATEGORY_LESSONS_ID, GUILD_ADMIN_ROLE_ID } = process.env;
+const Database = require("../../Functions/database");
+const { lessonFinishedEmbed, createQuestionEmbed, createAnswerModal } = require("../../Functions/embeds");
 
-module.exports = {
-	name: Events.InteractionCreate,
-	once: false,
-	async execute(interaction) {
-		if (interaction.customId != null)
+async function LessonModal(interaction) {
+    if (interaction.customId != null)
 		if (interaction.customId.startsWith('answer_question_')) {
 			const lesson = interaction.customId.split('_')[3];
 			const questionId = interaction.customId.split('_')[2];
@@ -45,5 +40,8 @@ module.exports = {
 				await interaction.channel.send(createQuestionEmbed(lesson, nextId, interaction.user.id, false, false, ''));		
 			}
 		}
-    }
+}
+
+module.exports = {
+    LessonModal
 }
