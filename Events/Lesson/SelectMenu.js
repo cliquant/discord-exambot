@@ -9,6 +9,10 @@ async function LessonSelectMenu(interaction) {
         interaction.update(createStartLessonEmbed(false));
 
         let firstId = Database.getLessonFirstQuestionId(lesson);
+        if (firstId === 'there_is_no_questions') {
+            await interaction.channel.send({ content: `Administrācīja šobrīd šim treniņam nav pievienojusi nevienu jautājumu.` })
+            return;
+        }
         let questionEmbed = createQuestionEmbed(lesson, firstId, interaction.user.id, false, false, '');
 
         await interaction.channel.send(questionEmbed);

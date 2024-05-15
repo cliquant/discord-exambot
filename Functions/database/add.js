@@ -180,6 +180,15 @@ function renameTrainingLessonTitle(lessonId, title) {
     lessonsDatabase.sync()
 }
 
+function changeTypeOfQuestion(lessonId, questionId, type) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    let lesson = lessons[lessonId]
+    let question = lesson.questions.find(question => question.id === questionId)
+    question.type = type
+    lessonsDatabase.set('lessons', lessons)
+    lessonsDatabase.sync()
+}
+
 module.exports = {
     addUserCoins,
     updateAllUserLessons,
@@ -195,5 +204,6 @@ module.exports = {
     addToUserLessonPoints,
     addUser,
     addTrainingLesson,
-    renameTrainingLessonTitle
+    renameTrainingLessonTitle,
+    changeTypeOfQuestion
 }

@@ -94,8 +94,19 @@ function getTrainingLessonById(id) {
 }
 
 function getLessonFirstQuestionId(lessonName) {
-    let questions = getLessonQuestions(lessonName)
-    return questions[0].id
+    let questions = getLessonQuestions(lessonName);
+
+    for (let i = 0; i < questions.length; i++) {
+        let question = questions[i];
+
+        if (question.type === 'text' && question.answers && question.answers.length > 0) {
+            return question.id;
+        } else if (question.type === 'select' && question.options && question.options.length > 0) {
+            return question.id;
+        }
+    }
+
+    return 'there_is_no_questions';
 }
 
 function getLessonNextQuestionId(userId, channelId, lessonName, currentQuestionId) {
@@ -105,15 +116,26 @@ function getLessonNextQuestionId(userId, channelId, lessonName, currentQuestionI
     let questionIndex = questions.findIndex(question => question.id === currentQuestionId);
 
     if (questionIndex === -1) {
-        throw new Error('Current question not found in the list.');
-    }
-
-    let nextQuestion = questions[questionIndex + 1];
-
-    if (!nextQuestion) {
         return 'there_is_no_more_questions';
     }
 
+    let nextQuestionIndex = questionIndex + 1;
+    while (nextQuestionIndex < questions.length) {
+        let nextQuestion = questions[nextQuestionIndex];
+        if (nextQuestion.type === 'text' && nextQuestion.answers && nextQuestion.answers.length === 0) {
+            nextQuestionIndex++;
+        } else if (nextQuestion.type === 'select' && nextQuestion.options && nextQuestion.options.length === 0) {
+            nextQuestionIndex++;
+        } else {
+            break;
+        }
+    }
+
+    if (nextQuestionIndex >= questions.length) {
+        return 'there_is_no_more_questions';
+    }
+
+    let nextQuestion = questions[nextQuestionIndex];
     let questionId = nextQuestion.id;
     let activeLessons = getActiveLessons();
     let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId);

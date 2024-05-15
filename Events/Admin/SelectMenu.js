@@ -1,3 +1,4 @@
+const Database = require("../../Functions/database");
 const { admin_confirmDelete, admin_editTrainingLessonEmbed, admin_chooseQuestionEmbed, admin_editTrainingQuestionEmbed } = require("../../Functions/embeds");
 
 async function AdminSelectMenu(interaction) {
@@ -26,6 +27,15 @@ async function AdminSelectMenu(interaction) {
             }
         }
     } 
+    if (interaction.values[0].startsWith('admin_edit_question_select_')) {
+        console.log(interaction.values[0])
+        let type = interaction.values[0].split('_')[4]
+        let lessonId = interaction.values[0].split('_')[5]
+        let questionId = interaction.values[0].split('_')[6]
+
+        Database.changeTypeOfQuestion(lessonId, questionId, type)
+        await interaction.update({ content: 'Jautājuma tips tika nomainīts uz ' + type, components: [], embeds: [], ephemeral: true })
+    }
     if (interaction.values[0].startsWith('admin_select_question_')) {
         let lessonId = interaction.values[0].split('_')[3]
         let questionId = interaction.values[0].split('_')[4]

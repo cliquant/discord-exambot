@@ -13,7 +13,8 @@ const {
     addToUserLessonPoints,
     addUser,
     addTrainingLesson,
-    renameTrainingLessonTitle
+    renameTrainingLessonTitle,
+    changeTypeOfQuestion
 } = require('./database/add.js');
 const {
     getLessonsInArray,
@@ -133,5 +134,6 @@ module.exports = {
     getTrainingLessonById,
     deleteTrainingLesson, 
     renameTrainingLessonTitle,
-    deleteTrainingQuestion
+    deleteTrainingQuestion,
+    changeTypeOfQuestion
 }

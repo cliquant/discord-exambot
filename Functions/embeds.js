@@ -821,6 +821,15 @@ function admin_confirmDelete(what, id) {
 function admin_chooseQuestionEmbed(forWhat, lesson) {
     const questions = Database.getLessonQuestions(lesson);
 
+    // add button "Pievienot jautājumu"
+    const button = new ButtonBuilder()
+        .setCustomId('admin_add_training_question_' + lesson)
+        .setLabel('Pievienot jautājumu')
+        .setStyle(ButtonStyle.Secondary);
+    
+    const row = new ActionRowBuilder()
+        .addComponents(button);
+
     const options = questions.map(question => {
         return new StringSelectMenuOptionBuilder()
             .setLabel(question.question)
@@ -843,7 +852,7 @@ function admin_chooseQuestionEmbed(forWhat, lesson) {
         .setFooter({ text: 'Eksāmenu palīgs'});
 
     return {
-        components: [row2],
+        components: [row, row2],
         embeds: [topEmbed],
         ephemeral: true
     };
@@ -906,11 +915,11 @@ function admin_editTrainingQuestionEmbed(type, lesson, questionId) {
 			.addOptions(
 				new StringSelectMenuOptionBuilder()
 					.setLabel('Text')
-					.setValue('admin_edit_question_select_text_' + lesson + '_' + question)
+					.setValue('admin_edit_question_select_text_' + lesson + '_' + question.id)
                     .setDefault(question.type == "text" ? true : false),
 				new StringSelectMenuOptionBuilder()
 					.setLabel('Select')
-					.setValue('admin_edit_question_select_select_' + lesson + '_' + question)
+					.setValue('admin_edit_question_select_select_' + lesson + '_' + question.id)
                     .setDefault(question.type == "select" ? true : false),
 			);
 
