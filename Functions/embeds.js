@@ -818,6 +818,29 @@ function admin_confirmDelete(what, id) {
     };
 }
 
+function admin_CreateQuestionModal(lesson) {
+    const modal = new ModalBuilder()
+        .setTitle('Pievienot jautājumu')
+        .setCustomId('admin_add_question_' + lesson + '_training');
+    
+    const titleInput = new TextInputBuilder()
+        .setCustomId('admin_add_question_title')
+        .setLabel('Jautājums')
+        .setStyle(TextInputStyle.Paragraph);
+
+    const typeInput = new TextInputBuilder()
+        .setCustomId('admin_add_question_type')
+        .setLabel('Atbildes tips ( select/text )')
+        .setStyle(TextInputStyle.Short);
+    
+    const firstActionRow = new ActionRowBuilder().addComponents(titleInput);
+    const secondActionRow = new ActionRowBuilder().addComponents(typeInput);
+
+    modal.addComponents(firstActionRow, secondActionRow);
+
+    return modal;
+}
+
 function admin_chooseQuestionEmbed(forWhat, lesson) {
     const questions = Database.getLessonQuestions(lesson);
 
@@ -1027,5 +1050,6 @@ module.exports = {
     admin_editTrainingLessonEmbed,
     admin_renameTrainingLessonModal,
     admin_editTrainingQuestionEmbed,
-    admin_chooseQuestionEmbed
+    admin_chooseQuestionEmbed,
+    admin_CreateQuestionModal
 }

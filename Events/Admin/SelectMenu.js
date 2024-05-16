@@ -1,5 +1,5 @@
 const Database = require("../../Functions/database");
-const { admin_confirmDelete, admin_editTrainingLessonEmbed, admin_chooseQuestionEmbed, admin_editTrainingQuestionEmbed } = require("../../Functions/embeds");
+const { admin_CreateQuestionModal, admin_confirmDelete, admin_editTrainingLessonEmbed, admin_chooseQuestionEmbed, admin_editTrainingQuestionEmbed } = require("../../Functions/embeds");
 
 async function AdminSelectMenu(interaction) {
     if (!interaction.isStringSelectMenu()) return;
@@ -24,6 +24,9 @@ async function AdminSelectMenu(interaction) {
             }
             if (forWhat2 == 'edit') {
                 await interaction.update(admin_chooseQuestionEmbed("trainingQuestion-edit", lessonId))
+            }
+            if (forWhat2 == 'add') {
+                await interaction.showModal(admin_CreateQuestionModal())
             }
         }
     } 
