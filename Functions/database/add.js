@@ -1,6 +1,6 @@
 const moment = require('moment');
 const JSONdb = require('simple-json-db');
-const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../other.js');
+const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../utils.js');
 const { getLessonsInArray, getUser, getUsers, getActiveLessons } = require('./get');
 
 function addUserCoins(userId, points) {
@@ -189,6 +189,20 @@ function changeTypeOfQuestion(lessonId, questionId, type) {
     lessonsDatabase.sync()
 }
 
+function editTrainingQuestionAnswers(lessonId, questionId, answers, type) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    let lesson = lessons[lessonId]
+    let question = lesson.questions.find(question => question.id === questionId)
+    if (type === 'text') {
+        // edit question.answers
+        question.answers = [answers]
+    } else {
+        question.select = answers
+    }
+    lessonsDatabase.set('lessons', lessons)
+    lessonsDatabase.sync()
+}
+
 module.exports = {
     addUserCoins,
     updateAllUserLessons,
@@ -205,5 +219,6 @@ module.exports = {
     addUser,
     addTrainingLesson,
     renameTrainingLessonTitle,
-    changeTypeOfQuestion
+    changeTypeOfQuestion,
+    editTrainingQuestionAnswers
 }

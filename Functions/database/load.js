@@ -1,6 +1,6 @@
 
 const moment = require('moment');
-const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../other.js');
+const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../utils.js');
 const { updateAllUserLessons } = require('./add');
 
 const defaultBooks = [

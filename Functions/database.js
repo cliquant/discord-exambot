@@ -14,7 +14,8 @@ const {
     addUser,
     addTrainingLesson,
     renameTrainingLessonTitle,
-    changeTypeOfQuestion
+    changeTypeOfQuestion,
+    editTrainingQuestionAnswers
 } = require('./database/add.js');
 const {
     getLessonsInArray,
@@ -49,7 +50,8 @@ const {
     getLastTimeCreatedTraining,
     getActiveLessonRewardCountTotal,
     getHint,
-    getTrainingLessonById
+    getTrainingLessonById,
+    getTrainingLessonQuestionAnswers
 } = require('./database/get.js');
 const {
     removeUserCoins,
@@ -67,7 +69,7 @@ const {
 } = require('./database/check.js');
 const {
     formatTime
-} = require('./other.js');
+} = require('./utils.js');
 const {
     prepareDatabase,
     startTimers
@@ -135,5 +137,7 @@ module.exports = {
     deleteTrainingLesson, 
     renameTrainingLessonTitle,
     deleteTrainingQuestion,
-    changeTypeOfQuestion
+    changeTypeOfQuestion,
+    editTrainingQuestionAnswers,
+    getTrainingLessonQuestionAnswers
 }

@@ -3,6 +3,7 @@ const { admin_CreateQuestionModal, admin_confirmDelete, admin_editTrainingLesson
 
 async function AdminSelectMenu(interaction) {
     if (!interaction.isStringSelectMenu()) return;
+    console.log(interaction.values[0])
     if (interaction.values[0].startsWith('admin_select_lesson_')) {
         let lessonId = interaction.values[0].split('_')[3]
         let forWhat = interaction.values[0].split('_')[4]
@@ -53,6 +54,7 @@ async function AdminSelectMenu(interaction) {
             if (forWhat2 == 'edit') {
                 await interaction.update(admin_editTrainingQuestionEmbed("choose", lessonId, questionId))
             }
+
         }
     }
 }

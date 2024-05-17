@@ -1,5 +1,5 @@
 const Database = require("../../Functions/database");
-const { admin_renameTrainingLessonModal } = require("../../Functions/embeds");
+const { admin_TrainingLessonQuestionAnswersEmbed, admin_renameTrainingLessonModal, admin_editTrainingQuestionModal } = require("../../Functions/embeds");
 
 async function AdminButtons(interaction) {
     if (!interaction.isButton()) return;
@@ -43,6 +43,20 @@ async function AdminButtons(interaction) {
             await interaction.reply({ content: `Treniņš veiksmīgi dzēsts!`, ephemeral: true });
         }
     } 
+    if (interaction.customId.startsWith('admin_edit_question_answers_')) {
+        const type = interaction.customId.split('_')[4];
+        const lessonId = interaction.customId.split('_')[5]
+        const questionId = interaction.customId.split('_')[6]
+
+        await interaction.showModal(admin_editTrainingQuestionModal(type, lessonId, questionId));
+    }
+    if (interaction.customId.startsWith('admin_edit_training_question_answer_select_')) {
+        console.log(interaction.customId)
+        const lessonId = interaction.customId.split('_')[6]
+        const questionId = interaction.customId.split('_')[7]
+
+        await interaction.update(admin_TrainingLessonQuestionAnswersEmbed(lessonId, questionId, 1))
+    }
 }
 
 module.exports = {

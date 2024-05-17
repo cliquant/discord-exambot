@@ -844,20 +844,13 @@ function admin_CreateQuestionModal(lesson) {
 function admin_chooseQuestionEmbed(forWhat, lesson) {
     const questions = Database.getLessonQuestions(lesson);
 
-    // add button "Pievienot jautājumu"
-    const button = new ButtonBuilder()
-        .setCustomId('admin_add_training_question_' + lesson)
-        .setLabel('Pievienot jautājumu')
-        .setStyle(ButtonStyle.Secondary);
-    
-    const row = new ActionRowBuilder()
-        .addComponents(button);
-
     const options = questions.map(question => {
         return new StringSelectMenuOptionBuilder()
             .setLabel(question.question)
             .setValue("admin_select_question_" + lesson + "_" + question.id + "_" + forWhat)
     });
+
+
 
     const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('select_history_lesson')
@@ -875,7 +868,7 @@ function admin_chooseQuestionEmbed(forWhat, lesson) {
         .setFooter({ text: 'Eksāmenu palīgs'});
 
     return {
-        components: [row, row2],
+        components: [row2],
         embeds: [topEmbed],
         ephemeral: true
     };
@@ -929,6 +922,91 @@ function admin_renameTrainingLessonModal(lesson) {
     return modal;
 }
 
+function admin_TrainingLessonQuestionAnswersEmbed(lesson, questionId, page) {
+    const question = Database.getQuestionFromId(lesson, questionId);
+
+    const answers = Database.getTrainingLessonQuestionAnswers(lesson, questionId);
+
+    let maxPage = Math.ceil(answers.length / 5);
+
+    let codePage = parseInt(page) - 1;
+
+    let answersPage = answers.slice(codePage * 5, codePage * 5 + 5);
+
+    let topEmbed;
+
+    let row;
+
+    let row2;
+
+    if (answersPage.length == 0) {
+        const button = new ButtonBuilder()
+            .setCustomId('admin_edit_training_question_answer_select_' + lesson + '_' + questionId)
+            .setLabel('Atpakaļ')
+            .setStyle(ButtonStyle.Secondary);
+
+        row = new ActionRowBuilder()
+            .addComponents(button);
+
+        topEmbed = new EmbedBuilder()
+            .setColor('#ffffff')
+            .setTitle('Atbildes')
+            .setDescription("```Nav atbilžu```")
+            .setTimestamp()
+            .setFooter({ text: 'Eksāmenu palīgs'});
+
+        row2 = new ActionRowBuilder()
+            .addComponents(button);
+    }
+
+    let message = "";
+
+    answersPage.forEach(answer => {
+        message += "```" + answer.answer + "```" + "\n";
+    })
+
+    let nextPageNumber = parseInt(page) + 1;
+
+    let previousPageNumber = parseInt(page) - 1;
+
+    const button_backward = new ButtonBuilder()
+        .setCustomId('admin_edit_training_question_answer_' + lesson + '_' + questionId + '_' + (previousPageNumber))
+        .setLabel('←')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(codePage == 0);
+        
+    const button_forward = new ButtonBuilder()
+        .setCustomId('admin_edit_training_question_answer_' + lesson + '_' + questionId + '_' + (nextPageNumber))
+        .setLabel('→')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(codePage + 1 == maxPage);
+
+
+    row2 = new ActionRowBuilder()
+        .addComponents(button_backward, button_forward);
+
+    topEmbed = new EmbedBuilder()
+        .setColor('#ffffff')
+        .setTitle('Atbildes')
+        .setDescription(message)
+        .setTimestamp()
+        .setFooter({ text: 'Eksāmenu palīgs'});
+
+    if (row) {
+        return {
+            components: [row, row2],
+            embeds: [topEmbed],
+            ephemeral: true
+        };
+    } else {
+        return {
+            components: [row2],
+            embeds: [topEmbed],
+            ephemeral: true
+        };
+    }
+}
+
 function admin_editTrainingQuestionEmbed(type, lesson, questionId) {
     if (type == "choose") {
         const question = Database.getQuestionFromId(lesson, questionId);
@@ -957,6 +1035,29 @@ function admin_editTrainingQuestionEmbed(type, lesson, questionId) {
         const row = new ActionRowBuilder()
             .addComponents(button);
 
+        const answers = Database.getTrainingLessonQuestionAnswers(lesson, question.id);
+
+        let disabledButton = false;
+
+        if (answers.length == 0) {
+            disabledButton = true;
+        }
+
+        const select2 = new ButtonBuilder()
+            .setCustomId('admin_edit_training_question_answer_select_' + lesson + '_' + question.id)
+            .setLabel('Skatīt atbildes')
+            .setDisabled(disabledButton)
+            .setStyle(ButtonStyle.Secondary);
+
+        const select3 = new ButtonBuilder()
+            .setCustomId('admin_edit_training_question_answer_add_select_' + lesson + '_' + question.id)
+            .setLabel('Pievienot atbildi')
+            .setStyle(ButtonStyle.Secondary);
+
+        const row3 = new ActionRowBuilder()
+            .addComponents(select2, select3);
+
+
         const topEmbed = new EmbedBuilder()
             .setColor('#ffffff')
             .setTitle('Admin')
@@ -965,7 +1066,68 @@ function admin_editTrainingQuestionEmbed(type, lesson, questionId) {
             .setFooter({ text: 'Eksāmenu palīgs'});
 
         return {
-            components: [row, row2],
+            components: [row, row3, row2],
+            embeds: [topEmbed],
+            ephemeral: true
+        }
+    } else {
+        const question = Database.getQuestionFromId(lesson, questionId);
+        const select = new StringSelectMenuBuilder()
+            .setCustomId('admin_edit_question_select')
+            .setPlaceholder('Izvēlies jautājuma tipu')
+            .addOptions(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Text')
+                    .setValue('admin_edit_question_select_text_' + lesson + '_' + question.id)
+                    .setDefault(question.type == "text" ? true : false),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Select')
+                    .setValue('admin_edit_question_select_select_' + lesson + '_' + question.id)
+                    .setDefault(question.type == "select" ? true : false),
+            );
+
+        const row2 = new ActionRowBuilder()
+            .addComponents(select);
+
+        const button = new ButtonBuilder()
+            .setCustomId('admin_edit_question_rename_' + lesson + '_' + question)
+            .setLabel('Pārdēvēt')
+            .setStyle(ButtonStyle.Secondary);
+
+        const row = new ActionRowBuilder()
+            .addComponents(button);
+
+        const answers = Database.getTrainingLessonQuestionAnswers(lesson, question.id);
+
+        let disabledButton = false;
+
+        if (answers.length == 0) {
+            disabledButton = true;
+        }
+        
+        const select2 = new ButtonBuilder()
+            .setCustomId('admin_edit_training_question_answer_select_' + lesson + '_' + question.id)
+            .setDisabled(disabledButton)
+            .setLabel('Skatīt atbildes')
+            .setStyle(ButtonStyle.Secondary);
+
+        const select3 = new ButtonBuilder()
+            .setCustomId('admin_edit_training_question_answer_add_text_' + lesson + '_' + question.id)
+            .setLabel('Pievienot atbildi')
+            .setStyle(ButtonStyle.Secondary);
+
+        const row3 = new ActionRowBuilder()
+            .addComponents(select2, select3);
+
+        const topEmbed = new EmbedBuilder()
+            .setColor('#ffffff')
+            .setTitle('Admin')
+            .setDescription("Izvēlies ko vēlies darīt ar jautājumu.")
+            .setTimestamp()
+            .setFooter({ text: 'Eksāmenu palīgs'});
+
+        return {
+            components: [row, row3, row2],
             embeds: [topEmbed],
             ephemeral: true
         }
@@ -1013,18 +1175,23 @@ function admin_CreateLessonModal(forWhat) {
         .setLabel('ID (1-100)')
         .setStyle(TextInputStyle.Short);
 
-    const typeInput = new TextInputBuilder()
-        .setCustomId('add_training_lesson_type')
-        .setLabel('Tips (text/select)')
-        .setStyle(TextInputStyle.Short);
-
     const firstActionRow = new ActionRowBuilder().addComponents(titleInput);
     const secondActionRow = new ActionRowBuilder().addComponents(idInput);
-    const thirdActionRow = new ActionRowBuilder().addComponents(typeInput);
 
-    modal.addComponents(firstActionRow, secondActionRow, thirdActionRow);
+    modal.addComponents(firstActionRow, secondActionRow);
 
     return modal;
+}
+
+function admin_editTrainingQuestionModal(mode, lesson, questionId) {
+    console.log(mode, lesson, questionId)
+    const question = Database.getQuestionFromId(lesson, questionId);
+    
+    if (mode == "select") {
+       
+    } else {
+   
+    }
 }
 
 module.exports = {
@@ -1051,5 +1218,7 @@ module.exports = {
     admin_renameTrainingLessonModal,
     admin_editTrainingQuestionEmbed,
     admin_chooseQuestionEmbed,
-    admin_CreateQuestionModal
+    admin_CreateQuestionModal,
+    admin_editTrainingQuestionModal,
+    admin_TrainingLessonQuestionAnswersEmbed
 }

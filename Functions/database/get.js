@@ -1,6 +1,6 @@
 const moment = require('moment');
 const JSONdb = require('simple-json-db');
-const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../other.js');
+const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../utils.js');
 
 function getLessonsInArray() {
     let lessons = lessonsDatabase.get('lessons') || []
@@ -75,6 +75,7 @@ function getActiveLessonByChannel(channelId) {
 
 function getQuestionFromId(lessonName, questionId) {
     let lessons = lessonsDatabase.get('lessons') || []
+    if (!lessons[lessonName]) return null
     return lessons[lessonName].questions.find(question => question.id === questionId)
 }
 
@@ -262,6 +263,17 @@ function getHint(lesson, questionId) {
     return hint
 }
 
+function getTrainingLessonQuestionAnswers(lessonId, questionId) {
+    let lessons = lessonsDatabase.get('lessons') || []
+    let lesson = lessons[lessonId]
+    let question = lesson.questions.find(question => question.id === questionId)
+    if (question.type === 'text') {
+        return question.answers
+    } else if (question.type === 'select') {
+        return question.select
+    }
+}
+
 module.exports = {
     getLessonsInArray,
     getUsers,
@@ -295,5 +307,6 @@ module.exports = {
     getLastTimeCreatedTraining,
     getActiveLessonRewardCountTotal,
     getHint,
-    getTrainingLessonById
+    getTrainingLessonById,
+    getTrainingLessonQuestionAnswers
 }

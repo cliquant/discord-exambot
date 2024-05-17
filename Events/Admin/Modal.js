@@ -2,6 +2,24 @@ const Database = require("../../Functions/database");
 
 async function AdminModal(interaction) {
     if (!interaction.isModalSubmit()) return;
+    if (interaction.customId.startsWith('admin_edit_question_answers_')) {
+        const answers = interaction.fields.getTextInputValue('admin_edit_question_answers');
+        const type = interaction.customId.split('_')[4];
+        if (answers == null) {
+            await interaction.reply({ content: `Lūdzu aizpildiet visus laukus!`, components: [], ephemeral: true });
+            return;
+        }
+
+        if (JSON.parse(answers) == null) {
+            await interaction.reply({ content: `Atbildes ir jāievada kā Array!`, components: [], ephemeral: true });
+            return;
+        }
+
+        const lessonId = interaction.customId.split('_')[5];
+        const questionId = interaction.customId.split('_')[6];
+
+        Database.editTrainingQuestionAnswers(lessonId, questionId, JSON.parse(answers), type);
+    }
     if (interaction.customId.startsWith('admin_add_question_')) {
         const lessonId = interaction.customId.split('_')[3];
         const question = interaction.fields.getTextInputValue('admin_add_question_question');

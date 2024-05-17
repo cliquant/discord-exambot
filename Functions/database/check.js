@@ -1,6 +1,6 @@
 const moment = require('moment');
 const JSONdb = require('simple-json-db');
-const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../other.js');
+const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../utils.js');
 const { getQuestionFromId } = require('./get');
 
 function canUserBuyHint(userId, lesson, questionId) {
