@@ -101,7 +101,7 @@ async function admin_ChooseLessonEmbed(forWhat) {
     if (lessons.length == 0) {
         options = [new StringSelectMenuOptionBuilder()
             .setLabel("Nav mācību")
-            .setValue("aaaaaaaaaaaaaaaaa")];
+            .setValue("non_working_button")];
     } else {
         options = await Promise.all(lessons.map(async (lesson) => {
             return new StringSelectMenuOptionBuilder()
@@ -168,8 +168,6 @@ async function admin_TrainingLessonQuestionAnswersEmbed(lesson, questionId, page
 
     const nextPageNumber = parseInt(page) + 1;
     const previousPageNumber = parseInt(page) - 1;
-
-    // ←→
 
     let topEmbed;
     let row;
@@ -599,7 +597,7 @@ async function admin_ChooseBookLessonEmbed(forWhat) {
     if (lessons.length == 0) {
         options = [new StringSelectMenuOptionBuilder()
             .setLabel("Nav mācību")
-            .setValue("aaaaaaaaaaaaaaaaa")];
+            .setValue("non_working_button")];
     } else {
         options = await Promise.all(lessons.map(async (lesson) => {
             return new StringSelectMenuOptionBuilder()

@@ -66,7 +66,7 @@ async function bookFirstPage() {
     if (lessons.length == 0) {
         options = [new StringSelectMenuOptionBuilder()
             .setLabel("Nav mācību")
-            .setValue("aaaaaaaaaaaaaaaaa")];
+            .setValue("non_working_button")];
     } else {
         options = await Promise.all(lessons.map(async (lesson) => {
             return new StringSelectMenuOptionBuilder()
