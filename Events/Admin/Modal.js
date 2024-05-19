@@ -4,34 +4,57 @@ const Embeds = require("../../Functions/embeds");
 
 async function AdminModal(interaction) {
     if (!interaction.isModalSubmit()) return;
+    if (interaction.customId.startsWith('admin_add_book_topicc_')) {
+        let lesson = interaction.customId.split('_')[4];
+        let title = interaction.fields.getTextInputValue('admin_add_book_topic_title');
+        let id = interaction.fields.getTextInputValue('admin_add_book_topic_id');
+
+        if (Database.doesAlreadyExistBookTopicID(id)) {
+            await interaction.reply({ content: `Šis ID jau eksistē!`, components: [], ephemeral: true, embeds: []});
+            return;
+        }
+
+        await Database.addBookTopic(lesson, title, id);
+        await interaction.update({ content: `Tēma veiksmīgi pievienota!`, components: [], ephemeral: true, embeds: [] });
+    }
+    if (interaction.customId.startsWith('admin_add_book_lesson')) {
+        let title = interaction.fields.getTextInputValue('admin_add_book_topic_title');
+        let id = interaction.fields.getTextInputValue('admin_add_book_topic_id');
+
+        if (Database.doesAlreadyExistBookID(id)) {
+            await interaction.reply({ content: `Šis ID jau eksistē!`, components: [], ephemeral: true, embeds: []});
+            return;
+        }
+
+        await Database.addBook(title, id);
+        await interaction.reply({ content: `Grāmata tika pievienota!`, components: [], ephemeral: true, embeds: [] });
+    }
     if (interaction.customId.startsWith('admin_add_question_')) {
         const lessonId = interaction.customId.split('_')[3];
-        const question = interaction.fields.getTextInputValue('admin_add_question_question');
-        const answer = interaction.fields.getTextInputValue('admin_add_question_answer');
+        const question = interaction.fields.getTextInputValue('admin_add_question_title');
         const type = interaction.fields.getTextInputValue('admin_add_question_type');
         const image = interaction.fields.getTextInputValue('admin_add_question_image');
 
-        if (image != null || image != 'none') {
+        if (image != null && image != 'none') {
             if (!image.startsWith('http')) {
                 await interaction.reply({ content: `Attēla URL jāsākas ar "http" vai "https"!`, components: [], ephemeral: true });
                 return;
             }
         }
 
-        if (question == null || answer == null || type == null) {
+        if (question == null || type == null) {
             await interaction.reply({ content: `Lūdzu aizpildiet visus laukus!`, components: [], ephemeral: true });
             return;
         }
 
-        const lesson = await Database.getTrainingLessonById(lessonId);
-        if (lesson == null) {
-            await interaction.reply({ content: `Šis treniņa ID neeksistē!`, components: [], ephemeral: true });
+        if (type != 'text' && type != 'select') {
+            await interaction.reply({ content: `Jautājuma tips var būt tikai "text" vai "select"!`, components: [], ephemeral: true });
             return;
         }
 
-        await Database.addTrainingQuestion(lessonId, question, answer, type, image);
+        await Database.addTrainingQuestion(lessonId, question, type, image);
 
-        await interaction.update({ content: `Jautājums veiksmīgi pievienots!`, components: [], ephemeral: true });
+        await interaction.update({ content: `Jautājums veiksmīgi pievienots!`, components: [], ephemeral: true, embeds: [] });
     }
     if (interaction.customId.startsWith('admin_edit_lesson_rename_')) {
         const lessonId = interaction.customId.split('_')[4];
@@ -56,6 +79,11 @@ async function AdminModal(interaction) {
         const titleInput = interaction.fields.getTextInputValue('add_training_lesson_title');
         const typeInput = interaction.fields.getTextInputValue('add_training_lesson_type');
         const idInput = interaction.fields.getTextInputValue('add_training_lesson_id');
+
+        if (Database.doesAlreadyExistTrainingLessonID(idInput)) {
+            await interaction.reply({ content: `Šis treniņa ID jau eksistē!`, components: [], embeds: [], ephemeral: true });
+            return;
+        }
 
         if (titleInput == null || typeInput == null || idInput == null) {
             await interaction.reply({ content: `Lūdzu aizpildiet visus laukus!`, components: [], ephemeral: true });

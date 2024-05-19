@@ -22,10 +22,12 @@ function checkAnswer(lesson, questionId, answer) {
             const questions = JSON.parse(row.questions);
             const question = questions.find(q => q.id === questionId);
             if (question.type === 'text') {
-                resolve(question.answers.includes(answer));
+                resolve(question.answers.includes(String(answer)) || question.answers.includes(parseInt(answer)));
             } else {
-                const correctAnswer = question.select.find(ans => ans[answer]);
-                resolve(correctAnswer ? correctAnswer[answer] : false);
+                const correctAnswer = question.select.find(a => {
+                    return a['id'] === answer && a[Object.keys(a)[0]] == true
+                });
+                resolve(correctAnswer !== undefined);
             }
         });
     });

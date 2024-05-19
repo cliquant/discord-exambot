@@ -42,7 +42,9 @@ async function LessonSelectMenu(interaction) {
             await Database.addToUserHistoryALesson(interaction.user.id, await Database.getActiveLessonByChannel(interaction.channel.id))
             await Database.deleteActiveLesson(interaction.channel.id);
             setTimeout(async () => {
-                await interaction.channel.delete();
+                if (interaction.channel != null) {
+                    await interaction.channel.delete();
+                }
             }, 60000);
         } else {
             await interaction.channel.send(await createQuestionEmbed(lesson, nextId, interaction.user.id, false, false));		

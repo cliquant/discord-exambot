@@ -1,5 +1,5 @@
 const { db } = require('../utils');
-const { getBooks, getLessonsInArray, getUser, getUsers, getActiveLessons, getLessonQuestions } = require('./get');
+const { getQuestionFromId, getBooks, getLessonsInArray, getUser, getUsers, getActiveLessons, getLessonQuestions } = require('./get');
 
 function addUserCoins(userId, points) {
     db.serialize(() => {
@@ -8,7 +8,7 @@ function addUserCoins(userId, points) {
                 console.error(err);
                 return;
             }
-            const newCoins = row.coins + points;
+            const newCoins = row.coins + parseInt(points);
             db.run('UPDATE users SET coins = ? WHERE id = ?', [newCoins, userId]);
         });
     });
@@ -27,14 +27,24 @@ function changeAnswerTrueOrFalse(lessonId, questionId, answerId, answer) {
     });
 }
 
-function addTrainingQuestion(lessonId, question, answer, type, image) {
-    image1 = image;
+function addTrainingQuestion(lessonId, question, type, image) {
+    let image1 = image;
     if (image === 'none') {
         image1 = "";
     }
+
+
     getLessonQuestions(lessonId).then(questions => {
-        const questionId = questions.length + 1;
-        questions.push({ id: questionId, question, answers: [answer], type, image1 });
+        const questionId = lessonId + String(questions.length + 1);
+        questions.push({ 
+            id: questionId, 
+            question, 
+            answers: [], 
+            type, 
+            image: image1,
+            hint: { enabled: false, question: "none", cost: 1 }
+        });
+    
         db.run('UPDATE lessons SET questions = ? WHERE id = ?', [JSON.stringify(questions), lessonId]);
     });
 }
@@ -270,6 +280,19 @@ function editBookLessonContent(lessonId, topicId, content) {
     });
 }
 
+function addBook(title, id) {
+    db.run('INSERT INTO books (id, title, topics) VALUES (?, ?, ?)', [id, title, JSON.stringify([])]);
+}
+
+function addBookTopic(bookId, title, id) {
+    getBooks().then(books => {
+        const book = books.find(b => b.id === bookId);
+        const topics = JSON.parse(book.topics);
+        topics.push({ id, title, content: "" });
+        db.run('UPDATE books SET topics = ? WHERE id = ?', [JSON.stringify(topics), bookId]);
+    });
+}
+
 module.exports = {
     addUserCoins,
     updateAllUserLessons,
@@ -295,5 +318,7 @@ module.exports = {
     addTrainingQuestionAnswerSelect,
     renameTrainingQuestionTitle,
     editTrainingQuestionHint,
-    editBookLessonContent
+    editBookLessonContent,
+    addBook,
+    addBookTopic
 };

@@ -109,7 +109,7 @@ async function createQuestionEmbed(lesson, questionId, userId, answered, answere
     if (answered) {
         if (answeredRight) {
             if (question.type == "text") {
-                desc += "```Atbilde: " + question.answers[0] + "```";
+                desc += "\n> **Atbilde:** " + question.answers[0];
             } else {
                 let correctAnswer;
                 question.select.find(answer => {
@@ -118,12 +118,16 @@ async function createQuestionEmbed(lesson, questionId, userId, answered, answere
                         return true;
                     }
                 });
-                desc += "```🎯: " + correctAnswer + "```";
+                desc += "\n> 🎯: " + correctAnswer;
             }
-            desc += "\n\n" + "```🟢 Pareizi atbildēts! Tu ieguvi: " + question.reward + " punktus!" + "```";
+            if (question.reward == 1) {
+                desc += "\n" + "```🟢 Pareizi atbildēts! Tu ieguvi: " + question.reward + " punktu!" + "```";
+            } else {
+                desc += "\n" + "```🟢 Pareizi atbildēts! Tu ieguvi: " + question.reward + " punktus!" + "```";
+            }
         } else {
             if (question.type == "text") {
-                desc += "```Atbilde: " + question.answers[0] + "```";
+                desc += "\n> **Atbilde:** " + question.answers[0];
             } else {
                 let correctAnswer;
                 question.select.find(answer1 => {
@@ -139,10 +143,10 @@ async function createQuestionEmbed(lesson, questionId, userId, answered, answere
                         return true;
                     }
                 });
-                desc += "```🎯: " + correctAnswer + "```";
-                desc += "```🫵: " + userAnswer1 + "```";
+                desc += "\n> 🎯: " + correctAnswer;
+                desc += "\n> 🫵: " + userAnswer1;
             }
-            desc += "\n\n" + "```🔴 Nepareizi atbildēts!```";
+            desc += "\n" + "```🔴 Nepareizi atbildēts!```";
         }
     }
 

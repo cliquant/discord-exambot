@@ -24,6 +24,7 @@ async function initializeDatabase() {
             startedAt INTEGER,
             type TEXT,
             questionId TEXT,
+            stoppedAt INTEGER,
             status TEXT,
             answerHistory TEXT
         )`);
@@ -110,12 +111,11 @@ async function prepareDatabase() {
                             "questions": [
                                 {
                                     "id": "math1",
-                                    "image": "none",
-                                    "question": "Cik ir 2+2?",
-                                    "image": "https://i.imgur.com/1zQ1Q9z.png",
+                                    "question": "Aprēķini riņķa laukumu S, ja riņķis ievilkts kvadrātā, kura laukums ir 196 cm2!",
+                                    "image": "https://i.imgur.com/I9Z6hXM.png",
                                     "type": "select",
                                     "answers": [],
-                                    "select": [{"4": true, "id": "answer1"}, {"5": false, "id": "answer2"}],
+                                    "select": [{"S=153,86π cm2": true, "id": "answer1"}, {"S=150π cm2": false, "id": "answer2"}],
                                     "reward": 1,
                                     "hint": {
                                         "enabled": false,
@@ -126,14 +126,15 @@ async function prepareDatabase() {
                                 {
                                     "id": "math2",
                                     "image": "none",
-                                    "question": "Cik ir 2*2?",
-                                    "type": "text",
-                                    "answers": [4, "četri", "četrpadsmit", "4", "four", "fourteen"],
+                                    "question": "Četrstūra leņķu lielumi var būt 90°;100°;110°;60°.",
+                                    "type": "select",
+                                    "answers": [],
                                     "reward": 1,
+                                    "select": [{"jā": true, "id": "answer1"}, {"nē": false, "id": "answer2"}],
                                     "hint": {
-                                        "enabled": false,
-                                        "question": "Test hint",
-                                        "cost": 1,
+                                        "enabled": true,
+                                        "question": "Piemērs: 1+1",
+                                        "cost": 3,
                                     }
                                 },
                                 {
@@ -141,7 +142,7 @@ async function prepareDatabase() {
                                     "image": "none",
                                     "question": "Cik ir 2-2?",
                                     "type": "text",
-                                    "answers": [0, "nulle", "zero"],
+                                    "answers": [0, "", "nulle", "zero"],
                                     "reward": 1,
                                     "hint": {
                                         "enabled": false,
@@ -154,11 +155,89 @@ async function prepareDatabase() {
                                     "image": "none",
                                     "question": "Cik ir 2/2?",
                                     "type": "text",
-                                    "answers": [1, "viens", "one"],
+                                    "answers": [1, "1", "viens", "one"],
                                     "reward": 1,
                                     "hint": {
                                         "enabled": false,
                                         "question": "Test hint",
+                                        "cost": 1,
+                                    }
+                                },
+                                {
+                                    "id": "math5",
+                                    "image": "none",
+                                    "question": "Dota aritmētiskā progresija 9; 12; 15; 18; 21; .... \nAprēķini dotās aritmētiskās progresijas diferenci!",
+                                    "type": "text",
+                                    "answers": [3, "3", "trīs", "three"],
+                                    "reward": 1,
+                                    "hint": {
+                                        "enabled": false,
+                                        "question": "Test hint",
+                                        "cost": 1,
+                                    }
+                                },
+                                {
+                                    "id": "math6",
+                                    "image": "none",
+                                    "question": "Dota aritmētiskā progresija: 3,8; 6; 8,2; 10,4; a5;a6;a7;a8;...;\nAprēķini dotās aritmētiskās progresijas diferenci!\nDiference ir...",
+                                    "type": "text",
+                                    "answers": [2.2, "2,2", "2.2"],
+                                    "reward": 1,
+                                    "hint": {
+                                        "enabled": false,
+                                        "question": "Test hint",
+                                        "cost": 1,
+                                    }
+                                },
+                                {
+                                    "id": "math7",
+                                    "image": "none",
+                                    "question": "Parabolas y=−5x2 zari vērsti uz:",
+                                    "type": "select",
+                                    "select": [{"augšu": false, "id": "answer1"}, {"leju": true, "id": "answer2"}],
+                                    "reward": 1,
+                                    "hint": {
+                                        "enabled": false,
+                                        "question": "Test hint",
+                                        "cost": 1,
+                                    }
+                                },
+                                {
+                                    "id": "math8",
+                                    "image": "none",
+                                    "question": "Kāda ir kvadrātsakne no 144?",
+                                    "type": "text",
+                                    "answers": [12, "12", "divpadsmit", "twelve"],
+                                    "reward": 1,
+                                    "hint": {
+                                        "enabled": true,
+                                        "question": "144/12",
+                                        "cost": 1,
+                                    }
+                                },
+                                {
+                                    "id": "math9",
+                                    "image": "https://i.imgur.com/SB3JnJz.png",
+                                    "question": "Aprēķini figūras laukumu!\nNosaki dotās kvadrātfunkcijas grafika krustpunktu ar x asi!\nAtbildi šādi: (...;...)",
+                                    "type": "text",
+                                    "answers": ["0;2", "(0;2)"],
+                                    "reward": 1,
+                                    "hint": {
+                                        "enabled": false,
+                                        "question": "Test hint",
+                                        "cost": 1,
+                                    }
+                                },
+                                {
+                                    "id": "math10",
+                                    "image": "none",
+                                    "question": "Kvadrātfunkcijas nulles ir x1=−6 un x2=10, parabolas vienādojums nav zināms.\n1. Aprēķini parabolas virsotnes abscisu (x0)!",
+                                    "type": "text",
+                                    "answers": [2, "2", "divi", "two"],
+                                    "reward": 1,
+                                    "hint": {
+                                        "enabled": true,
+                                        "question": "x0=(x1+x2)/2",
                                         "cost": 1,
                                     }
                                 }
@@ -176,7 +255,7 @@ async function prepareDatabase() {
                                     "reward": 1,
                                     "hint": {
                                         "enabled": true,
-                                        "question": "Test hint",
+                                        "question": "Ortog......",
                                         "cost": 1,
                                     }
                                 },

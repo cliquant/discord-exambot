@@ -147,7 +147,7 @@ function getLessonFirstQuestionId(lessonName) {
     return getLessonQuestions(lessonName).then(questions => {
         const question = questions.find(q => 
             (q.type === 'text' && q.answers.length > 0) || 
-            (q.type === 'select' && q.select.some(option => Object.keys(option)[0] === 'true' || Object.keys(option)[0] === true))
+            (q.type === 'select' && q.select.length > 0)
         );
         return question ? question.id : 'there_is_no_questions';
     });
@@ -315,8 +315,13 @@ function getActiveLessonRewardCountTotal(userId, channelId) {
     return new Promise((resolve, reject) => {
         db.get('SELECT answerHistory FROM activeLessons WHERE userId = ? AND channelId = ?', [userId, channelId], (err, row) => {
             if (err) return reject(err);
-            const answerHistory = JSON.parse(row.answerHistory || '[]');
-            const total = answerHistory.reduce((acc, answer) => acc + answer.reward, 0);
+            const answerHistory = JSON.parse(row.answerHistory);
+            let total = 0;
+            answerHistory.forEach(answer => {
+                if (answer['correct'] === true) {
+                    total += 1
+                }
+            });
             resolve(total);
         });
     });
@@ -367,6 +372,43 @@ function getBookTopicsInArray() {
     });
 }
 
+function doesAlreadyExistBookTopicID(topicId) {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT id FROM books WHERE id = ?', [topicId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row !== undefined);
+        });
+    });
+}
+
+function doesAlreadyExistTrainingLessonID(lessonId) {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT id FROM lessons WHERE id = ?', [lessonId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row !== undefined);
+        });
+    });
+}
+
+function doesAlreadyExistTrainingQuestionID(lessonId, questionId) {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT questions FROM lessons WHERE id = ?', [lessonId], (err, row) => {
+            if (err) return reject(err);
+            const questions = JSON.parse(row.questions);
+            resolve(questions.find(q => q.id === questionId) !== undefined);
+        });
+    });
+}
+
+function doesAlreadyExistBookID(bookId) {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT id FROM books WHERE id = ?', [bookId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row !== undefined);
+        });
+    });
+}
+
 module.exports = {
     getLessonsInArray,
     getUsers,
@@ -405,5 +447,9 @@ module.exports = {
     getTrainingLessonQuestionAnswer,
     doesTrainingQuestionHaveHint,
     getBookTopicsInArray,
-    getBooks
+    getBooks,
+    doesAlreadyExistBookTopicID,
+    doesAlreadyExistTrainingLessonID,
+    doesAlreadyExistTrainingQuestionID,
+    doesAlreadyExistBookID
 };

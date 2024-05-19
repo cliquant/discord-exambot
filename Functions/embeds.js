@@ -12,12 +12,13 @@ const {
     admin_addTrainingQuestionAnswerModal,
     renameTrainingQuestionTitle,
     trainingQuestionHintModa,
-    admin_BookTopicAddModal,
+    admin_BookLessonAddModal,
     admin_ChooseBookLessonEmbed,
     admin_renameBookTopicModal,
     admin_editBookTopicEmbed,
     admin_editBookLessonEmbed,
-    admin_editBookLessonModal
+    admin_editBookLessonModal,
+    admin_addBookTopic
 } = require("./embeds/admin");
 
 const {
@@ -75,10 +76,11 @@ module.exports = {
     admin_addTrainingQuestionAnswerModal,
     renameTrainingQuestionTitle,
     trainingQuestionHintModa,
-    admin_BookTopicAddModal,
+    admin_BookLessonAddModal,
     admin_ChooseBookLessonEmbed,
     admin_renameBookTopicModal,
     admin_editBookTopicEmbed,
     admin_editBookLessonEmbed,
-    admin_editBookLessonModal
+    admin_editBookLessonModal,
+    admin_addBookTopic,
 }

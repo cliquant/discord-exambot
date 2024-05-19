@@ -31,7 +31,7 @@ async function AdminSelectMenu(interaction) {
                 await interaction.update(await admin_chooseQuestionEmbed("trainingQuestion-edit", lessonId))
             }
             if (forWhat2 == 'add') {
-                await interaction.showModal(await admin_CreateQuestionModal())
+                await interaction.showModal(await admin_CreateQuestionModal(lessonId))
             }
         }
     } 

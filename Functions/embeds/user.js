@@ -160,6 +160,10 @@ async function myProfileEmbed(user) {
         myPointsMessage += `> **${await getTitleFromLessonId(lesson)}** - ${points} punkti\n`;
     }
 
+    if (databaseUser.coins == null) {
+        databaseUser.coins = "0 ( Failed to load )";
+    }
+
     const topEmbed = new EmbedBuilder()
         .setColor('#ffffff')
         .setTitle('Mans profils')
@@ -219,6 +223,7 @@ async function myProfileHistoryLesson(userid, lesson, page) {
     const lessonTitle = await getTitleFromLessonId(lesson);
     const codePage = parseInt(page) - 1;
     const historyLesson = history[codePage];
+    
 
     function doesHaveNextPage() {
         return history[codePage + 1] ? true : false;
@@ -272,7 +277,7 @@ async function myProfileHistoryLesson(userid, lesson, page) {
         } else {
             let message = "";
 
-            const answers = historyLesson.answerHistory;
+            const answers = JSON.parse(historyLesson.answerHistory);
             let question1 = 0;
             let totalPoints = 0;
             let answersRight = 0;

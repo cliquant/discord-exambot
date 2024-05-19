@@ -565,9 +565,9 @@ async function trainingQuestionHintModa(lesson, questionId) {
     }
 }
 
-async function admin_BookTopicAddModal() {
+async function admin_BookLessonAddModal() {
     const modal = new ModalBuilder()
-        .setCustomId('admin_add_book_topic')
+        .setCustomId('admin_add_book_lesson')
         .setTitle('Pievienot grāmatas tēmu');
 
     const titleInput = new TextInputBuilder()
@@ -704,8 +704,13 @@ async function admin_editBookTopicEmbed(lesson) {
         .setLabel('Pārdēvēt')
         .setStyle(ButtonStyle.Secondary);
 
+    const addButton = new ButtonBuilder()
+        .setCustomId('admin_add_book_topicc_' + lesson)
+        .setLabel('Pievienot tēmu')
+        .setStyle(ButtonStyle.Secondary);
+
     const row = new ActionRowBuilder()
-        .addComponents(button);
+        .addComponents(button, addButton);
 
     const topEmbed = new EmbedBuilder()
         .setColor('#ffffff')
@@ -739,7 +744,29 @@ async function admin_renameBookTopicModal(lesson) {
     return modal;
 }
 
+function admin_addBookTopic(lesson) {
+    const modal = new ModalBuilder()
+        .setTitle('Pievienot grāmatas tēmu')
+        .setCustomId('admin_add_book_topicc_' + lesson);
 
+    const titleInput = new TextInputBuilder()
+        .setCustomId('admin_add_book_topic_title')
+        .setLabel('Nosaukums')
+        .setStyle(TextInputStyle.Paragraph);
+
+    const idInput = new TextInputBuilder()
+        .setCustomId('admin_add_book_topic_id')
+        .setLabel('ID (1-100)')
+        .setStyle(TextInputStyle.Short);
+
+    const firstActionRow = new ActionRowBuilder().addComponents(titleInput);
+    const secondActionRow = new ActionRowBuilder().addComponents(idInput);
+
+    modal.addComponents(firstActionRow);
+    modal.addComponents(secondActionRow);
+
+    return modal;
+}
 
 
 module.exports = {
@@ -756,10 +783,11 @@ module.exports = {
     admin_addTrainingQuestionAnswerModal,
     renameTrainingQuestionTitle,
     trainingQuestionHintModa,
-    admin_BookTopicAddModal,
+    admin_BookLessonAddModal,
     admin_ChooseBookLessonEmbed,
     admin_renameBookTopicModal,
     admin_editBookTopicEmbed,
     admin_editBookLessonEmbed,
-    admin_editBookLessonModal
+    admin_editBookLessonModal,
+    admin_addBookTopic
 }

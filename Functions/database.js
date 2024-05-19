@@ -23,6 +23,9 @@ const {
     renameTrainingQuestionTitle,
     editTrainingQuestionHint,
     editBookLessonContent,
+    addTrainingQuestion,
+    addBook,
+    addBookTopic
 } = require('./database/add.js');
 const {
     getLessonsInArray,
@@ -62,7 +65,11 @@ const {
     getTrainingLessonQuestionAnswer,
     doesTrainingQuestionHaveHint,
     getBookTopicsInArray,
-    getBooks
+    getBooks,
+    doesAlreadyExistBookTopicID,
+    doesAlreadyExistTrainingLessonID,
+    doesAlreadyExistTrainingQuestionID,
+    doesAlreadyExistBookID
 } = require('./database/get.js');
 const {
     removeUserCoins,
@@ -165,5 +172,12 @@ module.exports = {
     editTrainingQuestionHint,
     deleteBookTopic,
     editBookLessonContent,
-    getBooks
+    getBooks,
+    addTrainingQuestion,
+    addBook,
+    addBookTopic,
+    doesAlreadyExistBookTopicID,
+    doesAlreadyExistTrainingLessonID,
+    doesAlreadyExistTrainingQuestionID,
+    doesAlreadyExistBookID
 };

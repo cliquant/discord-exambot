@@ -1,5 +1,5 @@
 const Database = require("../../Functions/database");
-const { admin_editBookLessonModal, admin_renameBookTopicModal, trainingQuestionHintModa, admin_TrainingLessonQuestionAnswersEmbed, admin_renameTrainingLessonModal, admin_addTrainingQuestionAnswerModal, admin_confirmDelete, admin_editTrainingQuestionAnswerModal, renameTrainingQuestionTitle } = require("../../Functions/embeds");
+const { admin_addBookTopic, admin_editBookLessonModal, admin_renameBookTopicModal, trainingQuestionHintModa, admin_TrainingLessonQuestionAnswersEmbed, admin_renameTrainingLessonModal, admin_addTrainingQuestionAnswerModal, admin_confirmDelete, admin_editTrainingQuestionAnswerModal, renameTrainingQuestionTitle } = require("../../Functions/embeds");
 
 async function AdminButtons(interaction) {
     if (!interaction.isButton()) return;
@@ -26,6 +26,11 @@ async function AdminButtons(interaction) {
         let topic = interaction.customId.split('_')[6]
         
         await interaction.showModal(await admin_editBookLessonModal(topic, lesson));
+    }
+    if (interaction.customId.startsWith('admin_add_book_topicc_')) {
+        let lesson = interaction.customId.split('_')[4]
+
+        await interaction.showModal(await admin_addBookTopic(lesson));
     }
     if (interaction.customId.startsWith('admin_select_book_lesson_')) {
         let lessonId = interaction.customId.split('_')[4]

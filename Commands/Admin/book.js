@@ -30,7 +30,7 @@ module.exports = {
 
 		if (type == 'book_topic') {
 			if (option == 'add') {
-				await interaction.showModal(await embeds.admin_BookTopicAddModal());
+				await interaction.reply(await embeds.admin_ChooseBookLessonEmbed("bookTopic-edit"));
 			}
 			if (option == 'delete') {
 				await interaction.reply(await embeds.admin_ChooseBookLessonEmbed("bookTopic-delete"));
@@ -40,7 +40,7 @@ module.exports = {
 			}
 		} else if (type == 'book_lesson') {
 			if (option == 'add') {
-				await interaction.reply(await embeds.admin_ChooseBookLessonEmbed("bookTopic-edit"));
+				await interaction.showModal(await embeds.admin_BookLessonAddModal());
 			}
 			if (option == 'delete') {
 				await interaction.reply(await embeds.admin_ChooseBookLessonEmbed("bookTopic-edit"));
