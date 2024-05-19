@@ -6,6 +6,6 @@ module.exports = {
 		.setName('books')
 		.setDescription('Ar šo komandu ir iespējams izlasīt (grāmatu) par kādu specifisku tēmu paskaidrojumu.'),
 	async execute(interaction) {
-        await interaction.reply(embeds.createBooksEmbed(true));
+        await interaction.reply(await embeds.createBooksEmbed(true));
 	},
 };

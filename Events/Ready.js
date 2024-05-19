@@ -7,17 +7,17 @@ module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client) {
-        Database.prepareDatabase().then(async () => {
-            Database.startTimers();
+        await Database.prepareDatabase().then(async () => {
+            await Database.startTimers();
             console.log('[DATABASE] Database is ready.')
             console.log(`[CLIENT] Logged in as ${client.user.tag}.\n`)
 
-            client.user.setPresence({
+            await client.user.setPresence({
                 activities: [{ name: "Spotify", type: ActivityType.Listening }]
             });
             setInterval(async () => {
                 client.user.setPresence({
-                    activities: [{ name: `${Database.getActiveLessonCount()} active lessons`, type: ActivityType.Watching }]
+                    activities: [{ name: `${await Database.getActiveLessonCount()} active lessons`, type: ActivityType.Watching }]
                 });
                 setTimeout(async () => {
                     client.user.setPresence({
@@ -31,9 +31,9 @@ module.exports = {
                 await channel_train.messages.fetch().then(messages => {
                     channel_train.bulkDelete(messages);
                 });
-                await channel_train.send(usersWhoCurrentlyTraining()).then(message => {
-                    setInterval(() => {
-                        message.edit(usersWhoCurrentlyTraining());
+                await channel_train.send(await usersWhoCurrentlyTraining()).then(async message => {
+                    setInterval(async () => {
+                        await message.edit(await usersWhoCurrentlyTraining());
                     }, 1000);
                 });
                 await channel_train.send(createStartEmbed());
@@ -41,35 +41,35 @@ module.exports = {
 
             if (TOP_CHANNEL_ENABLED == "true") {
                 const channel_top = client.channels.cache.get(GUILD_TOP_CHANNEL_ID);
-                await channel_top.messages.fetch().then(messages => {
-                    channel_top.bulkDelete(messages);
+                await channel_top.messages.fetch().then(async messages => {
+                    await channel_top.bulkDelete(messages);
                 });
-                await channel_top.send(createTopEmbed()).then(message => {
-                    setInterval(() => {
-                        message.edit(createTopEmbed());
+                await channel_top.send(await createTopEmbed()).then(message => {
+                    setInterval(async () => {
+                        await message.edit(await createTopEmbed());
                     }, 1000);
                 });
             }
 
             if (BOOKS_CHANNEL_ENABLD == "true") {
                 const channel_books = client.channels.cache.get(GUILD_BOOKS_CHANNEL_ID);
-                await channel_books.messages.fetch().then(messages => {
-                    channel_books.bulkDelete(messages);
+                await channel_books.messages.fetch().then(async messages => {
+                    await channel_books.bulkDelete(messages);
                 });
-                await channel_books.send(createBooksEmbed()).then(message => {
-                    setInterval(() => {
-                        message.edit(createBooksEmbed());
+                await channel_books.send(createBooksEmbed()).then(async message => {
+                    setInterval(async () => {
+                        await message.edit(await createBooksEmbed());
                     }, 1000);
                 });
             }
 
             if (START_CHANNEL_ENABLED == "true") {
                 const channel_start = client.channels.cache.get(GUILD_START_CHANNEL_ID);
-                await channel_start.messages.fetch().then(messages => {
-                    channel_start.bulkDelete(messages);
+                await channel_start.messages.fetch().then(async messages => {
+                    await channel_start.bulkDelete(messages);
                 });
     
-                await channel_start.send(explainBotEmbed());
+                await channel_start.send(await explainBotEmbed());
             }
         })
     }

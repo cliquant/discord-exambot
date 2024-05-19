@@ -15,8 +15,8 @@ module.exports = {
 	name: Events.InteractionCreate,
 	once: false,
 	async execute(interaction) {
-        if (!Database.getUser(interaction.user.id)) {
-            Database.addUser(interaction.user.id);
+        if (!await Database.getUser(interaction.user.id)) {
+            await Database.addUser(interaction.user.id);
         }
 
         await LessonButtons(interaction);

@@ -11,12 +11,12 @@ module.exports = {
         const channelId = interaction.channel.id;
 
         if (!Database.getActiveLessonByChannel(channelId)) {
-            interaction.reply({ content: 'Tu neesi šobrīd treniņā!', ephemeral: true });
+            await interaction.reply({ content: 'Tu neesi šobrīd treniņā!', ephemeral: true });
             return;
         } else {
-            interaction.reply({ content: 'Treniņš ir apstādināts!', ephemeral: true });
-            Database.removeActiveLesson(userId, channelId);
-            interaction.channel.delete();
+            await interaction.reply({ content: 'Treniņš ir apstādināts!', ephemeral: true });
+            await Database.removeActiveLesson(userId, channelId);
+            await interaction.channel.delete();
         }
 	},
 };

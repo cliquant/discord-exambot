@@ -1,50 +1,64 @@
-const moment = require('moment');
-const JSONdb = require('simple-json-db');
-const usersDatabase = new JSONdb('./Database/users.json');
-const activeLessonsDatabase = new JSONdb('./Database/activeLessons.json');
+const { db } = require('../utils');
 const { getLessonsInArray, getUser, getUsers, getActiveLessons } = require('./get');
 
 function deleteActiveLesson(channelId) {
-    let activeLessons = getActiveLessons()
-    let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId)
-    activeLessons.splice(lessonIndex, 1)
-    activeLessonsDatabase.set('activeLessons', activeLessons)
-    activeLessonsDatabase.sync()
+    db.run('DELETE FROM activeLessons WHERE channelId = ?', [channelId]);
 }
 
 function removeUserCoins(userId, points) {
-    let users = usersDatabase.get('users') || []
-    let user = users.find(user => user.id === userId)
-    user.coins -= points
-    usersDatabase.set('users', users)
-    usersDatabase.sync()
+    db.serialize(() => {
+        db.get('SELECT coins FROM users WHERE id = ?', [userId], (err, row) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            const newCoins = row.coins - points;
+            db.run('UPDATE users SET coins = ? WHERE id = ?', [newCoins, userId]);
+        });
+    });
 }
 
 function removeActiveLesson(userId, channelId) {
-    let activeLessons = getActiveLessons()
-    if (activeLessons.find(lesson => lesson.userId === userId && lesson.channelId === channelId)) {
-        deleteActiveLesson(channelId)
-    }
+    db.run('DELETE FROM activeLessons WHERE userId = ? AND channelId = ?', [userId, channelId]);
 }
 
 function deleteTrainingLesson(lessonId) {
-    let lessons = getLessonsInArray()
-    let lessonIndex = lessons.findIndex(lesson => lesson.id === lessonId)
-    if (lessonIndex === -1) return
-    lessons.splice(lessonIndex, 1)
-    lessonsDatabase.set('lessons', lessons)
-    lessonsDatabase.sync()
+    db.run('DELETE FROM lessons WHERE id = ?', [lessonId]);
 }
 
-function deleteTrainingQuestion(lesson, questionId) {
-    let lessons = getLessonsInArray()
-    let lessonIndex = lessons.findIndex(lesson => lesson.id === lessonId)
-    if (lessonIndex === -1) return
-    let questionIndex = lessons[lessonIndex].questions.findIndex(question => question.id === questionId)
-    if (questionIndex === -1) return
-    lessons[lessonIndex].questions.splice(questionIndex, 1)
-    lessonsDatabase.set('lessons', lessons)
-    lessonsDatabase.sync()
+function deleteTrainingQuestion(lessonId, questionId) {
+    getLessonQuestions(lessonId).then(questions => {
+        const updatedQuestions = questions.filter(q => q.id !== questionId);
+        db.run('UPDATE lessons SET questions = ? WHERE id = ?', [JSON.stringify(updatedQuestions), lessonId]);
+    });
+}
+
+function deleteTrainingQuestionAnswer(lessonId, questionId, answerId, type) {
+    if (type == 'select') {
+        getLessonQuestions(lessonId).then(questions => {
+            const updatedQuestions = questions.map(q => {
+                if (q.id == questionId) {
+                    q.select.forEach(s => {
+                        if (s.id == answerId) {
+                            delete s;
+                        }
+                    });
+                }
+                return q;
+            });
+            db.run('UPDATE lessons SET questions = ? WHERE id = ?', [JSON.stringify(updatedQuestions), lessonId]);
+        });
+    } else {
+        getLessonQuestions(lessonId).then(questions => {
+            const updatedQuestions = questions.map(q => {
+                if (q.id == questionId) {
+                    delete q.answers[answerId];
+                }
+                return q;
+            });
+            db.run('UPDATE lessons SET questions = ? WHERE id = ?', [JSON.stringify(updatedQuestions), lessonId]);
+        });
+    }
 }
 
 module.exports = {
@@ -52,5 +66,6 @@ module.exports = {
     removeActiveLesson,
     deleteActiveLesson,
     deleteTrainingLesson,
-    deleteTrainingQuestion
-}
+    deleteTrainingQuestion,
+    deleteTrainingQuestionAnswer
+};

@@ -3,41 +3,38 @@ const { admin_CreateQuestionModal, admin_confirmDelete, admin_editTrainingLesson
 
 async function AdminSelectMenu(interaction) {
     if (!interaction.isStringSelectMenu()) return;
-    console.log(interaction.values[0])
     if (interaction.values[0].startsWith('admin_select_lesson_')) {
         let lessonId = interaction.values[0].split('_')[3]
         let forWhat = interaction.values[0].split('_')[4]
         let forWhat1 = forWhat.split('-')[0].replace('(', '').replace(')', '')
         let forWhat2 = forWhat.split('-')[1].replace('(', '').replace(')', '')
 
-        console.log(forWhat1, forWhat2)
         if (forWhat1 == 'trainingLesson') {
             if (forWhat2 == 'delete') {
-                await interaction.update(admin_confirmDelete("trainingLesson", lessonId))
+                await interaction.update(await admin_confirmDelete("trainingLesson", lessonId))
             }
             if (forWhat2 == 'edit') {
-                await interaction.update(admin_editTrainingLessonEmbed("choose", lessonId))
+                await interaction.update(await admin_editTrainingLessonEmbed("choose", lessonId))
             }
         }
         if (forWhat1 == 'trainingQuestion') {
             if (forWhat2 == 'delete') {
-                await interaction.update(admin_chooseQuestionEmbed("trainingQuestion-delete", lessonId))
+                await interaction.update(await admin_chooseQuestionEmbed("trainingQuestion-delete", lessonId))
             }
             if (forWhat2 == 'edit') {
-                await interaction.update(admin_chooseQuestionEmbed("trainingQuestion-edit", lessonId))
+                await interaction.update(await admin_chooseQuestionEmbed("trainingQuestion-edit", lessonId))
             }
             if (forWhat2 == 'add') {
-                await interaction.showModal(admin_CreateQuestionModal())
+                await interaction.showModal(await admin_CreateQuestionModal())
             }
         }
     } 
     if (interaction.values[0].startsWith('admin_edit_question_select_')) {
-        console.log(interaction.values[0])
         let type = interaction.values[0].split('_')[4]
         let lessonId = interaction.values[0].split('_')[5]
         let questionId = interaction.values[0].split('_')[6]
 
-        Database.changeTypeOfQuestion(lessonId, questionId, type)
+        await Database.changeTypeOfQuestion(lessonId, questionId, type)
         await interaction.update({ content: 'Jautājuma tips tika nomainīts uz ' + type, components: [], embeds: [], ephemeral: true })
     }
     if (interaction.values[0].startsWith('admin_select_question_')) {
@@ -49,13 +46,24 @@ async function AdminSelectMenu(interaction) {
 
         if (forWhat1 == 'trainingQuestion') {
             if (forWhat2 == 'delete') {
-                await interaction.update(admin_confirmDelete("trainingQuestion", lessonId + "-" + questionId))
+                await interaction.update(await admin_confirmDelete("trainingQuestion", lessonId + "-" + questionId))
             }
             if (forWhat2 == 'edit') {
-                await interaction.update(admin_editTrainingQuestionEmbed("choose", lessonId, questionId))
+                await interaction.update(await admin_editTrainingQuestionEmbed("choose", lessonId, questionId))
             }
 
         }
+    }
+    if (interaction.values[0].startsWith('admin_edit_trainingquestion_answer_trueorfalse_')) {
+        // 'admin_edit_trainingquestion_answer_trueorfalse_' + lesson + '_' + question.id + '_' + answer[Object.keys(answer)[1]] + '_true'
+        let lessonId = interaction.values[0].split('_')[5]
+        let questionId = interaction.values[0].split('_')[6]
+        let answerId = interaction.values[0].split('_')[7]
+        let answer = interaction.values[0].split('_')[8]
+
+
+        await Database.changeAnswerTrueOrFalse(lessonId, questionId, answerId, answer)
+        await interaction.update({ content: 'Atbilde tika nomainīta uz ' + answer, components: [], embeds: [], ephemeral: true })
     }
 }
 

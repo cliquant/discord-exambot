@@ -6,6 +6,6 @@ module.exports = {
 		.setName('train')
 		.setDescription('Ar šo komandu ir iespējams redzēt top lietotājus ( punktus ir iespējams iegūt darot treniņus ).'),
 	async execute(interaction) {
-        await interaction.reply(embeds.createStartEmbed(true));
+        await interaction.reply(await embeds.createStartEmbed(true));
 	},
 };

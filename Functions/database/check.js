@@ -1,51 +1,56 @@
-const moment = require('moment');
-const JSONdb = require('simple-json-db');
-const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../utils.js');
+const { db } = require('../utils');
 const { getQuestionFromId } = require('./get');
 
 function canUserBuyHint(userId, lesson, questionId) {
-    let user = getUser(userId)
-    let hint = getHint(lesson, questionId)
-    return user.coins >= hint.cost
+    return new Promise((resolve, reject) => {
+        db.get('SELECT coins FROM users WHERE id = ?', [userId], (err, userRow) => {
+            if (err) return reject(err);
+            db.get('SELECT questions FROM lessons WHERE id = ?', [lesson], (err, lessonRow) => {
+                if (err) return reject(err);
+                const questions = JSON.parse(lessonRow.questions);
+                const question = questions.find(q => q.id === questionId);
+                resolve(userRow.coins >= question.hint.cost);
+            });
+        });
+    });
 }
 
 function checkAnswer(lesson, questionId, answer) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    if (lessons[lesson].questions.find(question => question.id === questionId).type === 'text') {
-        let correctAnswers = lessons[lesson].questions.find(question => question.id === questionId)
-        for (let correctAnswer of correctAnswers.answers) {
-            if (answer === correctAnswer.toString()) {
-                return true
+    return new Promise((resolve, reject) => {
+        db.get('SELECT questions FROM lessons WHERE id = ?', [lesson], (err, row) => {
+            if (err) return reject(err);
+            const questions = JSON.parse(row.questions);
+            const question = questions.find(q => q.id === questionId);
+            if (question.type === 'text') {
+                resolve(question.answers.includes(answer));
+            } else {
+                const correctAnswer = question.select.find(ans => ans[answer]);
+                resolve(correctAnswer ? correctAnswer[answer] : false);
             }
-        }
-    } else {
-        let correctAnswers = lessons[lesson].questions.find(question => question.id === questionId)
-        for (let correctAnswer of correctAnswers.select) {
-            if (correctAnswer.id === answer) {
-                let key = Object.keys(correctAnswer)[0];
-                let value = correctAnswer[key]
-                console.log(value)
-                return value
-            }
-        }
-    }
-    return false
+        });
+    });
 }
 
 function canUseHint(userId, lessonName, questionId) {
-    let question = getQuestionFromId(lessonName, questionId)
-    let hint = question.hint
-    return hint.enabled
+    return getQuestionFromId(lessonName, questionId).then(question => question.hint.enabled);
 }
 
 function isThisChannelLessonActive(channelId) {
-    let activeLessons = getActiveLessons()
-    return activeLessons.find(lesson => lesson.channelId === channelId) ? true : false
+    return new Promise((resolve, reject) => {
+        db.get('SELECT COUNT(*) as count FROM activeLessons WHERE channelId = ?', [channelId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row.count > 0);
+        });
+    });
 }
 
 function doesUserHaveEnoughCoins(userId, coins) {
-    let user = getUser(userId)
-    return user.coins >= coins
+    return new Promise((resolve, reject) => {
+        db.get('SELECT coins FROM users WHERE id = ?', [userId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row.coins >= coins);
+        });
+    });
 }
 
 module.exports = {
@@ -54,4 +59,4 @@ module.exports = {
     canUseHint,
     isThisChannelLessonActive,
     doesUserHaveEnoughCoins
-}
+};

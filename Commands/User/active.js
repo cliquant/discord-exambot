@@ -6,6 +6,6 @@ module.exports = {
 		.setName('active')
 		.setDescription('Apskati aktīvos lietotājus kuri šobrīd trenējas. 📊'),
 	async execute(interaction) {
-        await interaction.reply(embeds.usersWhoCurrentlyTraining(true));
+        await interaction.reply(await embeds.usersWhoCurrentlyTraining(true));
 	},
 };

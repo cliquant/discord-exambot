@@ -15,7 +15,9 @@ const {
     addTrainingLesson,
     renameTrainingLessonTitle,
     changeTypeOfQuestion,
-    editTrainingQuestionAnswers
+    editTrainingQuestionAnswers,
+    changeAnswerTrueOrFalse,
+    editTrainingQuestionAnswer
 } = require('./database/add.js');
 const {
     getLessonsInArray,
@@ -51,14 +53,16 @@ const {
     getActiveLessonRewardCountTotal,
     getHint,
     getTrainingLessonById,
-    getTrainingLessonQuestionAnswers
+    getTrainingLessonQuestionAnswers,
+    getTrainingLessonQuestionAnswer
 } = require('./database/get.js');
 const {
     removeUserCoins,
     removeActiveLesson,
     deleteActiveLesson,
     deleteTrainingLesson,
-    deleteTrainingQuestion
+    deleteTrainingQuestion,
+    deleteTrainingQuestionAnswer
 } = require('./database/remove.js');
 const {
     canUserBuyHint,
@@ -74,6 +78,7 @@ const {
     prepareDatabase,
     startTimers
 } = require('./database/load.js');
+
 
 module.exports = {
     startTimers,
@@ -139,5 +144,9 @@ module.exports = {
     deleteTrainingQuestion,
     changeTypeOfQuestion,
     editTrainingQuestionAnswers,
-    getTrainingLessonQuestionAnswers
-}
+    getTrainingLessonQuestionAnswers,
+    changeAnswerTrueOrFalse,
+    deleteTrainingQuestionAnswer,
+    editTrainingQuestionAnswer,
+    getTrainingLessonQuestionAnswer
+};

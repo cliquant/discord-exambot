@@ -8,6 +8,6 @@ module.exports = {
 	async execute(interaction) {
         const user = interaction.user;
 
-        await interaction.reply(embeds.explainBotEmbed(user));
+        await interaction.reply(await embeds.explainBotEmbed(user));
 	},
 };

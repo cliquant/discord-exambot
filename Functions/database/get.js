@@ -1,277 +1,345 @@
-const moment = require('moment');
-const JSONdb = require('simple-json-db');
-const { usersDatabase, lessonsDatabase, activeLessonsDatabase, booksDatabase } = require('../utils.js');
+const { db } = require('../utils');
 
 function getLessonsInArray() {
-    let lessons = lessonsDatabase.get('lessons') || []
-    let lessonsKeyArray = []
-    for (let key in lessons) {
-        lessonsKeyArray.push(key)
-    }
-    
-    return lessonsKeyArray
+    return new Promise((resolve, reject) => {
+        db.all('SELECT id FROM lessons', [], (err, rows) => {
+            if (err) return reject(err);
+            const lessons = rows.map(row => row.id);
+            resolve(lessons);
+        });
+    });
 }
 
 function getUsers() {
-    return usersDatabase.get('users') || []
+    return new Promise((resolve, reject) => {
+        db.all('SELECT * FROM users', [], (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        });
+    });
 }
 
 function getTop5Users(lessonName) {
-    let users = getUsers();
-    let userIdsWithPoints = []
-
-    users.forEach(user => {
-        let userPoints = user.lessons[lessonName]
-        userIdsWithPoints.push({ userId: user.id, points: userPoints })
-    })
-
-    userIdsWithPoints.sort((a, b) => b.points - a.points)
-
-    return userIdsWithPoints.slice(0, 5)
+    return new Promise((resolve, reject) => {
+        db.all('SELECT id, lessons FROM users', [], (err, users) => {
+            if (err) return reject(err);
+            let userIdsWithPoints = users.map(user => ({
+                userId: user.id,
+                points: JSON.parse(user.lessons)[lessonName]
+            }));
+            userIdsWithPoints.sort((a, b) => b.points - a.points);
+            resolve(userIdsWithPoints.slice(0, 5));
+        });
+    });
 }
 
 function getUserPointsInLesson(userId, lessonName) {
-    let user = getUser(userId)
-    return user.lessons[lessonName]
+    return new Promise((resolve, reject) => {
+        db.get('SELECT lessons FROM users WHERE id = ?', [userId], (err, row) => {
+            if (err) return reject(err);
+            const userLessons = JSON.parse(row.lessons);
+            resolve(userLessons[lessonName]);
+        });
+    });
 }
 
 function getTitleFromLessonId(lessonId) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    return lessons[lessonId].title
+    return new Promise((resolve, reject) => {
+        db.get('SELECT title FROM lessons WHERE id = ?', [lessonId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row.title);
+        });
+    });
 }
 
 function getUserActiveLessonCount(userId) {
-    let activeLessons = getActiveLessons()
-    return activeLessons.filter(lesson => lesson.userId === userId).length
+    return new Promise((resolve, reject) => {
+        db.get('SELECT COUNT(*) as count FROM activeLessons WHERE userId = ?', [userId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row.count);
+        });
+    });
 }
 
 function getUser(userId) {
-    let users = usersDatabase.get('users') || []
-    return users.find(user => user.id === userId)
+    return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM users WHERE id = ?', [userId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row);
+        });
+    });
 }
 
 function getLessonQuestionCount(lessonName) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    return lessons[lessonName].questions.length
+    return new Promise((resolve, reject) => {
+        db.get('SELECT questions FROM lessons WHERE id = ?', [lessonName], (err, row) => {
+            if (err) return reject(err);
+            const questions = JSON.parse(row.questions);
+            resolve(questions.length);
+        });
+    });
 }
 
 function getLessonQuestions(lessonName) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    return lessons[lessonName].questions
+    return new Promise((resolve, reject) => {
+        db.get('SELECT questions FROM lessons WHERE id = ?', [lessonName], (err, row) => {
+            if (err) return reject(err);
+            resolve(JSON.parse(row.questions));
+        });
+    });
 }
 
 function getActiveLessons() {
-    return activeLessonsDatabase.get('activeLessons') || []
+    return new Promise((resolve, reject) => {
+        db.all('SELECT * FROM activeLessons', [], (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        });
+    });
 }
 
 function getActiveLessonCount() {
-    return getActiveLessons().length || 0
+    return new Promise((resolve, reject) => {
+        db.get('SELECT COUNT(*) as count FROM activeLessons', [], (err, row) => {
+            if (err) return reject(err);
+            resolve(row.count);
+        });
+    });
 }
 
 function getActiveLessonByChannel(channelId) {
-    let activeLessons = getActiveLessons()
-    return activeLessons.find(lesson => lesson.channelId === channelId)
+    return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM activeLessons WHERE channelId = ?', [channelId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row);
+        });
+    });
 }
 
 function getQuestionFromId(lessonName, questionId) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    if (!lessons[lessonName]) return null
-    return lessons[lessonName].questions.find(question => question.id === questionId)
+    return new Promise((resolve, reject) => {
+        db.get('SELECT questions FROM lessons WHERE id = ?', [lessonName], (err, row) => {
+            if (err) return reject(err);
+            const questions = JSON.parse(row.questions);
+            resolve(questions.find(q => q.id === questionId));
+        });
+    });
 }
 
 function getAnswerFromId(lessonName, questionId) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    return lessons[lessonName].questions.find(question => question.id === questionId).answers[0]
+    return getQuestionFromId(lessonName, questionId).then(question => question.answers[0]);
 }
 
 function getHintFromId(lessonName, questionId) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    return lessons[lessonName].questions.find(question => question.id === questionId).hint.question
+    return getQuestionFromId(lessonName, questionId).then(question => question.hint.question);
 }
 
 function getTrainingLessonById(id) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    return lessons[id] || null
+    return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM lessons WHERE id = ?', [id], (err, row) => {
+            if (err) return reject(err);
+            resolve(row);
+        });
+    });
 }
 
 function getLessonFirstQuestionId(lessonName) {
-    let questions = getLessonQuestions(lessonName);
-
-    for (let i = 0; i < questions.length; i++) {
-        let question = questions[i];
-
-        if (question.type === 'text' && question.answers && question.answers.length > 0) {
-            return question.id;
-        } else if (question.type === 'select' && question.options && question.options.length > 0) {
-            return question.id;
-        }
-    }
-
-    return 'there_is_no_questions';
+    return getLessonQuestions(lessonName).then(questions => {
+        const question = questions.find(q => 
+            (q.type === 'text' && q.answers.length > 0) || 
+            (q.type === 'select' && q.select.some(option => Object.keys(option)[0] === 'true' || Object.keys(option)[0] === true))
+        );
+        return question ? question.id : 'there_is_no_questions';
+    });
 }
 
 function getLessonNextQuestionId(userId, channelId, lessonName, currentQuestionId) {
-    let user = getUser(userId);
-    let lesson = user.lessons[lessonName];
-    let questions = getLessonQuestions(lessonName);
-    let questionIndex = questions.findIndex(question => question.id === currentQuestionId);
+    return new Promise((resolve, reject) => {
+        getUser(userId).then(user => {
+            getLessonQuestions(lessonName).then(questions => {
+                const questionIndex = questions.findIndex(q => q.id === currentQuestionId);
+                if (questionIndex === -1) return resolve('there_is_no_more_questions');
 
-    if (questionIndex === -1) {
-        return 'there_is_no_more_questions';
-    }
+                let nextQuestionIndex = questionIndex + 1;
+                while (nextQuestionIndex < questions.length) {
+                    const nextQuestion = questions[nextQuestionIndex];
+                    if ((nextQuestion.type === 'text' && nextQuestion.answers.length === 0) || 
+                        (nextQuestion.type === 'select' && nextQuestion.select.length === 0)) {
+                        nextQuestionIndex++;
+                    } else {
+                        break;
+                    }
+                }
 
-    let nextQuestionIndex = questionIndex + 1;
-    while (nextQuestionIndex < questions.length) {
-        let nextQuestion = questions[nextQuestionIndex];
-        if (nextQuestion.type === 'text' && nextQuestion.answers && nextQuestion.answers.length === 0) {
-            nextQuestionIndex++;
-        } else if (nextQuestion.type === 'select' && nextQuestion.options && nextQuestion.options.length === 0) {
-            nextQuestionIndex++;
-        } else {
-            break;
-        }
-    }
+                if (nextQuestionIndex >= questions.length) return resolve('there_is_no_more_questions');
 
-    if (nextQuestionIndex >= questions.length) {
-        return 'there_is_no_more_questions';
-    }
-
-    let nextQuestion = questions[nextQuestionIndex];
-    let questionId = nextQuestion.id;
-    let activeLessons = getActiveLessons();
-    let lessonIndex = activeLessons.findIndex(lesson => lesson.channelId === channelId);
-
-    if (lessonIndex === -1) {
-        throw new Error('Lesson not found in active lessons.');
-    }
-
-    activeLessons[lessonIndex].questionId = questionId;
-    activeLessonsDatabase.set('activeLessons', activeLessons);
-    activeLessonsDatabase.sync();
-
-    return questionId;
+                const nextQuestionId = questions[nextQuestionIndex].id;
+                db.run('UPDATE activeLessons SET questionId = ? WHERE channelId = ?', [nextQuestionId, channelId], err => {
+                    if (err) return reject(err);
+                    resolve(nextQuestionId);
+                });
+            });
+        });
+    });
 }
 
 function getLessonQuestionFromId(lessonName, questionId) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    return lessons[lessonName].questions.find(question => question.id === questionId)
+    return getQuestionFromId(lessonName, questionId);
 }
 
 function getBookLessonTitleFromId(bookId) {
-    let books = booksDatabase.get('books') || []
-    return books[bookId].title
+    return new Promise((resolve, reject) => {
+        db.get('SELECT title FROM books WHERE id = ?', [bookId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row.title);
+        });
+    });
 }
 
 function getBookLessonsIdsInArray() {
-    let books = booksDatabase.get('books') || []
-    let bookIds = []
-    for (let key in books) {
-        bookIds.push(key)
-    }
-    return bookIds
+    return new Promise((resolve, reject) => {
+        db.all('SELECT id FROM books', [], (err, rows) => {
+            if (err) return reject(err);
+            const bookIds = rows.map(row => row.id);
+            resolve(bookIds);
+        });
+    });
 }
 
 function getBookContent(topic, bookId) {
-    let books = booksDatabase.get('books') || []
-    return books[topic].id[bookId].content
+    return new Promise((resolve, reject) => {
+        db.get('SELECT topics FROM books WHERE id = ?', [bookId], (err, row) => {
+            if (err) return reject(err);
+            const topics = JSON.parse(row.topics);
+            const content = topics.find(t => t.id === topic).content;
+            resolve(content);
+        });
+    });
 }
 
 function getTopicIdsInArray(topic) {
-    let books = booksDatabase.get('books') || []
-    let bookIds = []
-    for (let key in books[topic].topics) {
-        bookIds.push(books[topic].topics[key].id)
-    }
-    return bookIds
+    return new Promise((resolve, reject) => {
+        db.get('SELECT topics FROM books WHERE id = ?', [topic], (err, row) => {
+            if (err) return reject(err);
+            const topics = JSON.parse(row.topics);
+            const topicIds = topics.map(t => t.id);
+            resolve(topicIds);
+        });
+    });
 }
 
 function getTopicTitleFromId(lesson, topic) {
-    let books = booksDatabase.get('books') || []
-    for (let key in books[lesson].topics) {
-        if (books[lesson].topics[key].id === topic) {
-            return books[lesson].topics[key].title
-        }
-    }
+    return new Promise((resolve, reject) => {
+        db.get('SELECT topics FROM books WHERE id = ?', [lesson], (err, row) => {
+            if (err) return reject(err);
+            const topics = JSON.parse(row.topics);
+            const topicTitle = topics.find(t => t.id === topic).title;
+            resolve(topicTitle);
+        });
+    });
 }
 
 function getTopicContentFromId(lesson, topic) {
-    let books = booksDatabase.get('books') || []
-    for (let key in books[lesson].topics) {
-        if (books[lesson].topics[key].id === topic) {
-            return books[lesson].topics[key].content
-        }
-    }
+    return new Promise((resolve, reject) => {
+        db.get('SELECT topics FROM books WHERE id = ?', [lesson], (err, row) => {
+            if (err) return reject(err);
+            const topics = JSON.parse(row.topics);
+            const topicContent = topics.find(t => t.id === topic).content;
+            resolve(topicContent);
+        });
+    });
 }
 
 function getActiveLessonUsersByType(type) {
-    let activeLessons = getActiveLessons()
-    let users = []
-    activeLessons.forEach(lesson => {
-        if (lesson.type === type) {
-            users.push([lesson.userId, lesson.channelId, lesson.questionId])
-        }
-    })
-    return users
+    return new Promise((resolve, reject) => {
+        db.all('SELECT userId, channelId, questionId FROM activeLessons WHERE type = ?', [type], (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        });
+    });
 }
 
 function getStartedAt(userId, channelId) {
-    let activeLessons = getActiveLessons()
-    let lesson = activeLessons.find(lesson => lesson.userId === userId && lesson.channelId === channelId)
-    return lesson.startedAt
+    return new Promise((resolve, reject) => {
+        db.get('SELECT startedAt FROM activeLessons WHERE userId = ? AND channelId = ?', [userId, channelId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row.startedAt);
+        });
+    });
 }
 
 function getActiveLessonHistory(userId, channelId) {
-    let activeLessons = getActiveLessons()
-    let lessonIndex = activeLessons.findIndex(lesson => lesson.userId === userId && lesson.channelId === channelId)
-    return activeLessons[lessonIndex].answerHistory || []
+    return new Promise((resolve, reject) => {
+        db.get('SELECT answerHistory FROM activeLessons WHERE userId = ? AND channelId = ?', [userId, channelId], (err, row) => {
+            if (err) return reject(err);
+            resolve(JSON.parse(row.answerHistory || '[]'));
+        });
+    });
 }
 
 function getUserHistoryLessonInSpecificLesson(userId, lesson) {
-    let users = getUsers();
-    let user = getUser(userId);
-    let userHistory = user.lessonsHistory || []
-    let lessonHistory = userHistory.filter(history => history.type === lesson)
-    return lessonHistory || []
+    return new Promise((resolve, reject) => {
+        db.get('SELECT lessonsHistory FROM users WHERE id = ?', [userId], (err, row) => {
+            if (err) return reject(err);
+            const lessonsHistory = JSON.parse(row.lessonsHistory || '[]');
+            const lessonHistory = lessonsHistory.filter(history => history.type === lesson);
+            resolve(lessonHistory);
+        });
+    });
 }
 
 function getUserLastLessonCreate(userId) {
-    let users = getUsers();
-    let user = getUser(userId);
-    return user.lastTrainingTime || 0
+    return new Promise((resolve, reject) => {
+        db.get('SELECT lastTrainingTime FROM users WHERE id = ?', [userId], (err, row) => {
+            if (err) return reject(err);
+            resolve(row.lastTrainingTime);
+        });
+    });
 }
 
 function getLastTimeCreatedTraining(userId) {
-    let users = getUsers();
-    let user = getUser(userId);
-    return user.lastTrainingTime || 0
+    return getUserLastLessonCreate(userId);
 }
 
 function getActiveLessonRewardCountTotal(userId, channelId) {
-    let activeLessons = getActiveLessons()
-    let lessonIndex = activeLessons.findIndex(lesson => lesson.userId === userId && lesson.channelId === channelId)
-    let answerHistory = activeLessons[lessonIndex].answerHistory || []
-    let total = 0
-    answerHistory.forEach(answer => {
-        total += answer.reward
-    })
-    return total
+    return new Promise((resolve, reject) => {
+        db.get('SELECT answerHistory FROM activeLessons WHERE userId = ? AND channelId = ?', [userId, channelId], (err, row) => {
+            if (err) return reject(err);
+            const answerHistory = JSON.parse(row.answerHistory || '[]');
+            const total = answerHistory.reduce((acc, answer) => acc + answer.reward, 0);
+            resolve(total);
+        });
+    });
 }
 
 function getHint(lesson, questionId) {
-    let question = getQuestionFromId(lesson, questionId)
-    let hint = question.hint
-    return hint
+    return getQuestionFromId(lesson, questionId).then(question => question.hint);
 }
 
 function getTrainingLessonQuestionAnswers(lessonId, questionId) {
-    let lessons = lessonsDatabase.get('lessons') || []
-    let lesson = lessons[lessonId]
-    let question = lesson.questions.find(question => question.id === questionId)
-    if (question.type === 'text') {
-        return question.answers
-    } else if (question.type === 'select') {
-        return question.select
-    }
+    return getQuestionFromId(lessonId, questionId).then(question => {
+        if (question.type === 'text') {
+            return question.answers;
+        } else if (question.type === 'select') {
+            return question.select;
+        }
+    });
+}
+
+function getTrainingLessonQuestionAnswer(lesson, questionId, answerId, type) {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT questions FROM lessons WHERE id = ?', [lesson], (err, row) => {
+            if (err) return reject(err);
+            const questions = JSON.parse(row.questions);
+            const question = questions.find(q => q.id === questionId);
+            if (type === 'text') {
+                resolve(question.answers[answerId - 1]);
+            } else if (type === 'select') {
+                resolve(question.select.find(a => a.id === answerId));
+            }
+        });
+    });
+
 }
 
 module.exports = {
@@ -308,5 +376,6 @@ module.exports = {
     getActiveLessonRewardCountTotal,
     getHint,
     getTrainingLessonById,
-    getTrainingLessonQuestionAnswers
-}
+    getTrainingLessonQuestionAnswers,
+    getTrainingLessonQuestionAnswer
+};

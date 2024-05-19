@@ -33,6 +33,6 @@ module.exports = {
 		} else if (type == 'book_lesson') {
 
 		}
-		interaction.reply({ content: `Tu izvēlējies ${type} un ${option}.`, ephemeral: true });
+		await interaction.reply({ content: `Tu izvēlējies ${type} un ${option}.`, ephemeral: true });
 	},
 };

@@ -6,7 +6,7 @@ async function MyProfileSelectMenu(interaction) {
         let lesson = interaction.values[0].split('_')[3];
         let user = interaction.user.id;
 
-        await interaction.update(myProfileHistoryLesson(user, lesson, 1));
+        await interaction.update(await myProfileHistoryLesson(user, lesson, 1));
     }
 }
 

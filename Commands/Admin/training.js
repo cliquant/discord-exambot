@@ -30,19 +30,19 @@ module.exports = {
 
         if (type == 'trainingQuestion') {
             let forWhat = 'trainingQuestion-' + option;
-            await interaction.reply(embeds.admin_ChooseLessonEmbed(forWhat));
+            await interaction.reply(await embeds.admin_ChooseLessonEmbed(forWhat));
         }
 
         if (type == 'trainingLesson') {
             let forWhat = 'trainingLesson-' + option;
             if (option == 'add') {
-                await interaction.showModal(embeds.admin_CreateLessonModal(forWhat));
+                await interaction.showModal(await embeds.admin_CreateLessonModal(forWhat));
             }
 			if (option == 'delete') {
-				await interaction.reply(embeds.admin_ChooseLessonEmbed(forWhat));
+				await interaction.reply(await embeds.admin_ChooseLessonEmbed(forWhat));
 			}
 			if (option == 'edit') {
-				await interaction.reply(embeds.admin_ChooseLessonEmbed(forWhat));
+				await interaction.reply(await embeds.admin_ChooseLessonEmbed(forWhat));
 			}
         }
 	},
