@@ -1,8 +1,14 @@
 const Database = require("../../Functions/database");
-const { admin_CreateQuestionModal, admin_confirmDelete, admin_editTrainingLessonEmbed, admin_chooseQuestionEmbed, admin_editTrainingQuestionEmbed } = require("../../Functions/embeds");
+const { admin_editBookLessonEmbed, admin_editBookTopicEmbed, admin_CreateQuestionModal, admin_confirmDelete, admin_editTrainingLessonEmbed, admin_chooseQuestionEmbed, admin_editTrainingQuestionEmbed } = require("../../Functions/embeds");
 
 async function AdminSelectMenu(interaction) {
     if (!interaction.isStringSelectMenu()) return;
+    if (interaction.values[0].startsWith('admin_select_book1_lesson_')) {
+        let topic = interaction.values[0].split('_')[4]
+        let lesson = interaction.values[0].split('_')[5]
+
+        await interaction.update(await admin_editBookLessonEmbed(topic, lesson))
+    }
     if (interaction.values[0].startsWith('admin_select_lesson_')) {
         let lessonId = interaction.values[0].split('_')[3]
         let forWhat = interaction.values[0].split('_')[4]
@@ -14,7 +20,7 @@ async function AdminSelectMenu(interaction) {
                 await interaction.update(await admin_confirmDelete("trainingLesson", lessonId))
             }
             if (forWhat2 == 'edit') {
-                await interaction.update(await admin_editTrainingLessonEmbed("choose", lessonId))
+                await interaction.update(await admin_editTrainingLessonEmbed("select", lessonId))
             }
         }
         if (forWhat1 == 'trainingQuestion') {
@@ -29,6 +35,21 @@ async function AdminSelectMenu(interaction) {
             }
         }
     } 
+    if (interaction.values[0].startsWith('admin_select_book_lesson_')) {
+        let lessonId = interaction.values[0].split('_')[4]
+        let forWhat = interaction.values[0].split('_')[5]
+        let forWhat2 = forWhat.split('-')[0].replace('(', '').replace(')', '')
+        let forWhat3 = forWhat.split('-')[1].replace('(', '').replace(')', '')
+
+        if (forWhat2 == 'bookTopic') {
+            if (forWhat3 == 'delete') {
+                await interaction.update(await admin_confirmDelete('bookTopic', lessonId))
+            }
+            if (forWhat3 == 'edit') {
+                await interaction.update(await admin_editBookTopicEmbed(lessonId))
+            }
+        }
+    }
     if (interaction.values[0].startsWith('admin_edit_question_select_')) {
         let type = interaction.values[0].split('_')[4]
         let lessonId = interaction.values[0].split('_')[5]
@@ -49,13 +70,12 @@ async function AdminSelectMenu(interaction) {
                 await interaction.update(await admin_confirmDelete("trainingQuestion", lessonId + "-" + questionId))
             }
             if (forWhat2 == 'edit') {
-                await interaction.update(await admin_editTrainingQuestionEmbed("choose", lessonId, questionId))
+                await interaction.update(await admin_editTrainingQuestionEmbed("select", lessonId, questionId))
             }
 
         }
     }
     if (interaction.values[0].startsWith('admin_edit_trainingquestion_answer_trueorfalse_')) {
-        // 'admin_edit_trainingquestion_answer_trueorfalse_' + lesson + '_' + question.id + '_' + answer[Object.keys(answer)[1]] + '_true'
         let lessonId = interaction.values[0].split('_')[5]
         let questionId = interaction.values[0].split('_')[6]
         let answerId = interaction.values[0].split('_')[7]

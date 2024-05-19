@@ -1,5 +1,5 @@
 const { db } = require('../utils');
-const { getLessonsInArray, getUser, getUsers, getActiveLessons, getLessonQuestions } = require('./get');
+const { getBooks, getLessonsInArray, getUser, getUsers, getActiveLessons, getLessonQuestions } = require('./get');
 
 function addUserCoins(userId, points) {
     db.serialize(() => {
@@ -223,6 +223,53 @@ function editTrainingQuestionAnswer(lessonId, questionId, answerId, answer, type
     });
 }
 
+function addTrainingQuestionAnswerText(lessonId, questionId, answer) {
+    getLessonQuestions(lessonId).then(questions => {
+        const question = questions.find(q => q.id === questionId);
+        question.answers.push(answer);
+        db.run('UPDATE lessons SET questions = ? WHERE id = ?', [JSON.stringify(questions), lessonId]);
+    });
+}
+
+function addTrainingQuestionAnswerSelect(lessonId, questionId, answer, correct) {
+    getLessonQuestions(lessonId).then(questions => {
+        const question = questions.find(q => q.id === questionId);
+        stringAnswer = answer.toString();
+        const something = {
+            [stringAnswer]: correct,
+            "id": "answer" + (question.select.length + 1)
+        }
+        question.select.push(something);
+        db.run('UPDATE lessons SET questions = ? WHERE id = ?', [JSON.stringify(questions), lessonId]);
+    });
+}
+
+function renameTrainingQuestionTitle(lessonId, questionId, title) {
+    getLessonQuestions(lessonId).then(questions => {
+        const question = questions.find(q => q.id === questionId);
+        question.question = title;
+        db.run('UPDATE lessons SET questions = ? WHERE id = ?', [JSON.stringify(questions), lessonId]);
+    });
+}
+
+function editTrainingQuestionHint(lessonId, questionId, hint) {
+    getLessonQuestions(lessonId).then(questions => {
+        const question = questions.find(q => q.id === questionId);
+        question.hint = hint;
+        db.run('UPDATE lessons SET questions = ? WHERE id = ?', [JSON.stringify(questions), lessonId]);
+    });
+}
+
+function editBookLessonContent(lessonId, topicId, content) {
+    getBooks().then(books => {
+        const book = books.find(b => b.id === lessonId);
+        const topics = JSON.parse(book.topics);
+        const topic = topics.find(t => t.id === topicId);
+        topic.content = content;
+        db.run('UPDATE books SET topics = ? WHERE id = ?', [JSON.stringify(topics), lessonId]);
+    });
+}
+
 module.exports = {
     addUserCoins,
     updateAllUserLessons,
@@ -243,5 +290,10 @@ module.exports = {
     editTrainingQuestionAnswers,
     addTrainingQuestion,
     changeAnswerTrueOrFalse,
-    editTrainingQuestionAnswer
+    editTrainingQuestionAnswer,
+    addTrainingQuestionAnswerText,
+    addTrainingQuestionAnswerSelect,
+    renameTrainingQuestionTitle,
+    editTrainingQuestionHint,
+    editBookLessonContent
 };

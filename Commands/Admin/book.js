@@ -29,10 +29,25 @@ module.exports = {
 		const option = interaction.options.getString('option');
 
 		if (type == 'book_topic') {
-			
+			if (option == 'add') {
+				await interaction.showModal(await embeds.admin_BookTopicAddModal());
+			}
+			if (option == 'delete') {
+				await interaction.reply(await embeds.admin_ChooseBookLessonEmbed("bookTopic-delete"));
+			}
+			if (option == 'edit') {
+				await interaction.reply(await embeds.admin_ChooseBookLessonEmbed("bookTopic-edit"));
+			}
 		} else if (type == 'book_lesson') {
-
+			if (option == 'add') {
+				await interaction.reply(await embeds.admin_ChooseBookLessonEmbed("bookTopic-edit"));
+			}
+			if (option == 'delete') {
+				await interaction.reply(await embeds.admin_ChooseBookLessonEmbed("bookTopic-edit"));
+			}
+			if (option == 'edit') {
+				await interaction.reply(await embeds.admin_ChooseBookLessonEmbed("bookTopic-edit"));
+			}
 		}
-		await interaction.reply({ content: `Tu izvēlējies ${type} un ${option}.`, ephemeral: true });
 	},
 };

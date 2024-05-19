@@ -61,11 +61,17 @@ function deleteTrainingQuestionAnswer(lessonId, questionId, answerId, type) {
     }
 }
 
+function deleteBookTopic(id) {
+    db.run('DELETE FROM books WHERE id = ?', [id]);
+}
+
+
 module.exports = {
     removeUserCoins,
     removeActiveLesson,
     deleteActiveLesson,
     deleteTrainingLesson,
     deleteTrainingQuestion,
-    deleteTrainingQuestionAnswer
+    deleteTrainingQuestionAnswer,
+    deleteBookTopic
 };

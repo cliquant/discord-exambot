@@ -1,14 +1,50 @@
 const Database = require("../../Functions/database");
-const { admin_TrainingLessonQuestionAnswersEmbed, admin_renameTrainingLessonModal, admin_editTrainingQuestionModal, admin_confirmDelete, admin_editTrainingQuestionAnswerModal } = require("../../Functions/embeds");
+const { admin_editBookLessonModal, admin_renameBookTopicModal, trainingQuestionHintModa, admin_TrainingLessonQuestionAnswersEmbed, admin_renameTrainingLessonModal, admin_addTrainingQuestionAnswerModal, admin_confirmDelete, admin_editTrainingQuestionAnswerModal, renameTrainingQuestionTitle } = require("../../Functions/embeds");
 
 async function AdminButtons(interaction) {
     if (!interaction.isButton()) return;
-    if (interaction.customId.startsWith('admin_edit_training_question_answer_add_select_')) {
-        let lessonId = interaction.customId.split('_')[6]
-        let questionId = interaction.customId.split('_')[7]
-        let type = interaction.customId.split('_')[8]
+    if (interaction.customId.startsWith('admin_edit_question_rename_')) {
+        let lesson = interaction.customId.split('_')[4]
+        let questionId = interaction.customId.split('_')[5]
 
-        await interaction.showModal(await admin_editTrainingQuestionAnswerModal(lessonId, questionId, type));
+        await interaction.showModal(await renameTrainingQuestionTitle(lesson, questionId));
+    }
+    if (interaction.customId.startsWith('admin_edit_question_hint_')) {
+        let lesson = interaction.customId.split('_')[4]
+        let questionId = interaction.customId.split('_')[5]
+
+        await interaction.showModal(await trainingQuestionHintModa(lesson, questionId));
+    }
+    if (interaction.customId.startsWith('admin_edit_book_lesson_rename_')) {
+        let lesson = interaction.customId.split('_')[5]
+        let topic = interaction.customId.split('_')[6]
+
+        await interaction.showModal(await admin_renameBookTopicModal(lesson, topic));
+    }
+    if (interaction.customId.startsWith('admin_edit_book_lesson_edittext_')) {
+        let lesson = interaction.customId.split('_')[5]
+        let topic = interaction.customId.split('_')[6]
+        
+        await interaction.showModal(await admin_editBookLessonModal(topic, lesson));
+    }
+    if (interaction.customId.startsWith('admin_select_book_lesson_')) {
+        let lessonId = interaction.customId.split('_')[4]
+        let forWhat = interaction.customId.split('_')[5]
+        let forWhat2 = forWhat.split('-')[0].replace('(', '').replace(')', '')
+        let forWhat3 = forWhat.split('-')[1].replace('(', '').replace(')', '')
+
+        if (forWhat2 == 'bookTopic') {
+            if (forWhat3 == 'edit') {
+                await interaction.showModal(await admin_renameBookTopicModal(lessonId));
+            }
+        }
+    }
+    if (interaction.customId.startsWith('admin_edit_training_question_answer_add_')) {
+        let type = interaction.customId.split('_')[6]
+        let lesson = interaction.customId.split('_')[7]
+        let questionId = interaction.customId.split('_')[8]
+
+        await interaction.showModal(await admin_addTrainingQuestionAnswerModal(type, lesson, questionId));
     }
     if (interaction.customId.startsWith('admin_edit_lesson_rename_')) {
         let lessonId = interaction.customId.split('_')[4]
@@ -39,6 +75,11 @@ async function AdminButtons(interaction) {
             await interaction.update(await admin_confirmDelete('trainingLessonAnswerText', lesson + '-' + questionId + '-' + answersPage))
         }
     }
+    if (interaction.customId.startsWith('admin_edit_book_topic_rename_')) {
+        let lesson = interaction.customId.split('_')[5]
+
+        await interaction.showModal(await admin_renameBookTopicModal(lesson));
+    }
     if (interaction.customId.startsWith('confirm_delete_')) {
         let what = interaction.customId.split('_')[2]
         let ID = interaction.customId.split('_')[3]
@@ -50,6 +91,17 @@ async function AdminButtons(interaction) {
 
             await Database.deleteTrainingQuestionAnswer(lesson, question, answer, 'select')
             await interaction.update({ content: `Atbilde veiksmīgi dzēsta!`, ephemeral: true, components: [], embeds: [] });
+        }
+
+        if (what == 'bookTopic') {
+            let exist = await Database.getBookLessonsIdsInArray()
+
+            exist = exist.find(lesson => {
+                return lesson == ID
+            })
+            if (!exist) return await interaction.update({ content: `Tēma ar šādu ID neeksistē!`, ephemeral: true, embeds: [], components: [] });
+            await Database.deleteBookTopic(ID)
+            await interaction.update({ content: `Tēma veiksmīgi dzēsta!`, ephemeral: true, components: [], embeds: [] });
         }
 
         if (what == 'trainingLessonAnswerText') {

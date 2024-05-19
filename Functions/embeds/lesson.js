@@ -6,6 +6,14 @@ const { GUILD_BOOKS_CHANNEL_ID, GUILD_TRAIN_CHANNEL_ID, GUILD_TOP_CHANNEL_ID, GU
 
 async function createSelectLessonMenu() {
     const lessons = await getLessonsInArray();
+
+    if (lessons.length == 0) {
+        return {
+            content: 'Nav mācību',
+            ephemeral: true
+        };
+    }
+    
     const options = await Promise.all(lessons.map(async (lesson) => {
         return new StringSelectMenuOptionBuilder()
             .setLabel(await getTitleFromLessonId(lesson))
@@ -52,12 +60,20 @@ function createBooksEmbed(boolean = false) {
 
 async function bookFirstPage() {
     const lessons = await Database.getBookLessonsIdsInArray();
-    const options = await Promise.all(lessons.map(async (lesson) => {
-        return new StringSelectMenuOptionBuilder()
-            .setLabel(await Database.getBookLessonTitleFromId(lesson))
-            .setValue("lesson_book_" + lesson);
-    }));
 
+    let options;
+
+    if (lessons.length == 0) {
+        options = [new StringSelectMenuOptionBuilder()
+            .setLabel("Nav mācību")
+            .setValue("aaaaaaaaaaaaaaaaa")];
+    } else {
+        options = await Promise.all(lessons.map(async (lesson) => {
+            return new StringSelectMenuOptionBuilder()
+                .setLabel(await Database.getBookLessonTitleFromId(lesson))
+                .setValue("lesson_book_" + lesson);
+        }));
+    }
     const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('book_select_lesson')
         .setPlaceholder('Izvēlies mācību')
@@ -105,6 +121,13 @@ async function bookContentPage(title, content, lesson) {
 
 async function bookSelectTopic(lesson) {
     const topics = await Database.getTopicIdsInArray(lesson);
+
+    if (topics.length == 0) {
+        return {
+            content: 'Šai mācībai nav tēmu',
+            ephemeral: true
+        };
+    }
 
     const options = await Promise.all(topics.map(async (topic) => {
         return new StringSelectMenuOptionBuilder()

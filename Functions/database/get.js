@@ -201,6 +201,7 @@ function getBookLessonsIdsInArray() {
         db.all('SELECT id FROM books', [], (err, rows) => {
             if (err) return reject(err);
             const bookIds = rows.map(row => row.id);
+            if (bookIds.length === 0) return resolve([]);
             resolve(bookIds);
         });
     });
@@ -210,9 +211,18 @@ function getBookContent(topic, bookId) {
     return new Promise((resolve, reject) => {
         db.get('SELECT topics FROM books WHERE id = ?', [bookId], (err, row) => {
             if (err) return reject(err);
-            const topics = JSON.parse(row.topics);
-            const content = topics.find(t => t.id === topic).content;
+            const book = JSON.parse(row.topics);
+            const content = book.find(t => t.id === topic).content;
             resolve(content);
+        });
+    });
+}
+
+function getBooks() {
+    return new Promise((resolve, reject) => {
+        db.all('SELECT * FROM books', [], (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
         });
     });
 }
@@ -339,7 +349,22 @@ function getTrainingLessonQuestionAnswer(lesson, questionId, answerId, type) {
             }
         });
     });
+}
 
+function doesTrainingQuestionHaveHint(lesson, questionId) {
+    return getQuestionFromId(lesson, questionId).then(question => {
+        return question.hint !== undefined;
+    });
+}
+
+function getBookTopicsInArray() {
+    return new Promise((resolve, reject) => {
+        db.all('SELECT topics FROM books', [], (err, rows) => {
+            if (err) return reject(err);
+            const topics = rows.map(row => JSON.parse(row.topics));
+            resolve(topics);
+        });
+    });
 }
 
 module.exports = {
@@ -377,5 +402,8 @@ module.exports = {
     getHint,
     getTrainingLessonById,
     getTrainingLessonQuestionAnswers,
-    getTrainingLessonQuestionAnswer
+    getTrainingLessonQuestionAnswer,
+    doesTrainingQuestionHaveHint,
+    getBookTopicsInArray,
+    getBooks
 };

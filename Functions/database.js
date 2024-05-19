@@ -17,7 +17,12 @@ const {
     changeTypeOfQuestion,
     editTrainingQuestionAnswers,
     changeAnswerTrueOrFalse,
-    editTrainingQuestionAnswer
+    editTrainingQuestionAnswer,
+    addTrainingQuestionAnswerText,
+    addTrainingQuestionAnswerSelect,
+    renameTrainingQuestionTitle,
+    editTrainingQuestionHint,
+    editBookLessonContent,
 } = require('./database/add.js');
 const {
     getLessonsInArray,
@@ -54,7 +59,10 @@ const {
     getHint,
     getTrainingLessonById,
     getTrainingLessonQuestionAnswers,
-    getTrainingLessonQuestionAnswer
+    getTrainingLessonQuestionAnswer,
+    doesTrainingQuestionHaveHint,
+    getBookTopicsInArray,
+    getBooks
 } = require('./database/get.js');
 const {
     removeUserCoins,
@@ -62,7 +70,8 @@ const {
     deleteActiveLesson,
     deleteTrainingLesson,
     deleteTrainingQuestion,
-    deleteTrainingQuestionAnswer
+    deleteTrainingQuestionAnswer,
+    deleteBookTopic
 } = require('./database/remove.js');
 const {
     canUserBuyHint,
@@ -148,5 +157,13 @@ module.exports = {
     changeAnswerTrueOrFalse,
     deleteTrainingQuestionAnswer,
     editTrainingQuestionAnswer,
-    getTrainingLessonQuestionAnswer
+    getTrainingLessonQuestionAnswer,
+    addTrainingQuestionAnswerText,
+    addTrainingQuestionAnswerSelect,
+    renameTrainingQuestionTitle,
+    doesTrainingQuestionHaveHint,
+    editTrainingQuestionHint,
+    deleteBookTopic,
+    editBookLessonContent,
+    getBooks
 };
