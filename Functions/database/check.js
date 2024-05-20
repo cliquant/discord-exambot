@@ -22,15 +22,8 @@ function checkAnswer(lesson, questionId, answer) {
             const questions = JSON.parse(row.questions);
             const question = questions.find(q => q.id === questionId);
             if (question.type === 'text') {
-                const answerStr = String(answer);
-
-                const firstLetterLower = answerStr.charAt(0).toLowerCase() + answerStr.slice(1);
-                const firstLetterUpper = answerStr.charAt(0).toUpperCase() + answerStr.slice(1);
-
-                const isCorrect = question.answers.includes(firstLetterLower) ||
-                                  question.answers.includes(firstLetterUpper) ||
-                                  question.answers.includes(answerStr);
-
+                const answerStr = String(answer).toLowerCase();
+                const isCorrect = question.answers.some(correctAnswer => correctAnswer.toLowerCase() === answerStr);
                 resolve(isCorrect);
             } else {
                 const correctAnswer = question.select.find(a => {

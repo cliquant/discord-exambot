@@ -58,11 +58,11 @@ for (const file of HandlerFiles) {
 	}
 }
 
-const rest = new REST().setToken(DISCORD_BOT_TOKEN);
+const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN);
 
 (async () => {
 	try {
-		const data = await rest.put(
+		await rest.put(
 			Routes.applicationGuildCommands(DISCORD_BOT_ID, DISCORD_GUILD_ID),
 			{ body: commands },
 		);
