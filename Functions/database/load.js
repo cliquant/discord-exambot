@@ -240,6 +240,46 @@ async function prepareDatabase() {
                                         "question": "x0=(x1+x2)/2",
                                         "cost": 1,
                                     }
+                                },
+                                {
+                                    "id": "math11",
+                                    "image": "none",
+                                    "question": "Izpildi darbības: 5b – 3 – 2b",
+                                    "type": "text",
+                                    "answers": ["3b − 3", "3b−3"],
+                                    "reward": 1,
+                                    "hint": {
+                                        "enabled": true,
+                                        "question": "Saīsina 5b - 2b = 3b, skaitļu daļa paliek neskarta.",
+                                        "cost": 1,
+                                    }
+                                },
+                                {
+                                    "id": "math12",
+                                    "image": "none",
+                                    "question": "Sadali reizinātājos: 1 – 6a + 9a^2 =",
+                                    "type": "select",
+                                    "answers": [],
+                                    "select": [{"(1 − 3a)(1 + 3a)": false, "id": "answer1"}, {"(1 + 3a)^2": true, "id": "answer2"}, {"(1 − 9a)(1 + a)": false, "id": "answer3"}],
+                                    "reward": 1,
+                                    "hint": {
+                                        "enabled": false,
+                                        "question": "",
+                                        "cost": 1,
+                                    }
+                                },
+                                {
+                                    "id": "math13",
+                                    "image": "none",
+                                    "question": "Aprēķini: 1,2 * 0,15",
+                                    "type": "text",
+                                    "answers": [0.18, "0,18", "0.18", "divpadsmit", "eighteen"],
+                                    "reward": 1,
+                                    "hint": {
+                                        "enabled": false,
+                                        "question": "",
+                                        "cost": 1,
+                                    }
                                 }
                             ]
                         },
