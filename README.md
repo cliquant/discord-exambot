@@ -8,7 +8,7 @@
 ## Setup:
 
 - Download NodeJS and NPM from [nodejs.org](https://nodejs.org/en)
-- Download the project or using `git clone https://github.com/cliquant/discord-exambot` clone it
+- Download the project or clone it using `git clone https://github.com/cliquant/discord-exambot`
 - Open IDE or terminal in the project folder and enter in terminal `npm i` ( make sure you have package.json file )
 - Rename `.env.example` to `.env`
 - Open `.env` and enter your bot/guild details. ( In the file everything is commented )
