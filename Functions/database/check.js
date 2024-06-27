@@ -21,11 +21,22 @@ function checkAnswer(lesson, questionId, answer) {
             if (err) return reject(err);
             const questions = JSON.parse(row.questions);
             const question = questions.find(q => q.id === questionId);
+
+            if (!question) {
+                return reject(new Error('Question not found'));
+            }
+
             if (question.type === 'text') {
                 const answerStr = String(answer).toLowerCase();
-                const isCorrect = question.answers.some(correctAnswer => correctAnswer.toLowerCase() === answerStr);
+                if (!Array.isArray(question.answers)) {
+                    return reject(new Error('Answers is not an array'));
+                }
+                const isCorrect = question.answers.some(correctAnswer => typeof correctAnswer === 'string' && correctAnswer.toLowerCase() === answerStr);
                 resolve(isCorrect);
             } else {
+                if (!Array.isArray(question.select)) {
+                    return reject(new Error('Select is not an array'));
+                }
                 const correctAnswer = question.select.find(a => {
                     return a['id'] === answer && a[Object.keys(a)[0]] == true
                 });
