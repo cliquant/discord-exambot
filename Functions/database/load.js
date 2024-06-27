@@ -142,7 +142,7 @@ async function prepareDatabase() {
                                     "image": "none",
                                     "question": "Cik ir 2-2?",
                                     "type": "text",
-                                    "answers": [0, "", "nulle", "zero"],
+                                    "answers": [0, "0", "nulle", "zero"],
                                     "reward": 1,
                                     "hint": {
                                         "enabled": false,
